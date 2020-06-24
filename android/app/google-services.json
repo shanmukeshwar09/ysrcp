@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "576252397907",
+    "firebase_url": "https://ysrcp-9bd2c.firebaseio.com",
+    "project_id": "ysrcp-9bd2c",
+    "storage_bucket": "ysrcp-9bd2c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:576252397907:android:99cf574dd47501916cb9a6",
+        "android_client_info": {
+          "package_name": "com.example.ysrcp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "576252397907-meg25lr3t5er5g72ch7dmloubpobabi3.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmyKhlNe6SphqPhgxbCuravVEQuWQUWW4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "576252397907-meg25lr3t5er5g72ch7dmloubpobabi3.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
