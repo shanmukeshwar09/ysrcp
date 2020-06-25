@@ -1,8 +1,11 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ysrcp/screens/settings.dart';
 import 'package:ysrcp/screens/signin.dart';
 import 'package:ysrcp/screens/super_user.dart';
 import 'package:ysrcp/screens/user_request.dart';
@@ -25,9 +28,9 @@ class _MainPageState extends State<MainPage>
 
   TabController _tabController;
 
-  initOnGoing() async {
+  initOnGoing() {
     _onGoingController.add('waiting');
-    await _firestore
+    _firestore
         .collection('Users')
         .document(widget.uid)
         .collection('onGoing')
@@ -41,9 +44,9 @@ class _MainPageState extends State<MainPage>
     });
   }
 
-  initPending() async {
+  initPending() {
     _pendingController.add('waiting');
-    await _firestore
+    _firestore
         .collection('Users')
         .document(widget.uid)
         .collection('pending')
@@ -62,6 +65,7 @@ class _MainPageState extends State<MainPage>
     _tabController = new TabController(length: 2, vsync: this);
     _pendingStream = _pendingController.stream;
     _onGoingStream = _onGoingController.stream;
+    initOnGoing();
     super.initState();
   }
 
@@ -78,8 +82,8 @@ class _MainPageState extends State<MainPage>
         elevation: 0,
         bottom: TabBar(
           indicatorColor: Colors.transparent,
-          labelColor: Colors.grey,
-          unselectedLabelColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white54,
           tabs: [
             Tab(text: 'Pending'),
             Tab(text: 'OnGoing'),
@@ -104,9 +108,65 @@ class _MainPageState extends State<MainPage>
             DrawerHeader(child: Text('//TODO YSRCP LOGO')),
             ListTile(
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) {
-                  return Superuser();
-                }));
+                String password;
+                showDialog(
+                    context: context,
+                    child: Scaffold(
+                      backgroundColor: Colors.transparent,
+                      body: CupertinoAlertDialog(
+                        title: Text('Enter Password'),
+                        actions: <Widget>[
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom:
+                                        BorderSide(color: Colors.grey[200]))),
+                            child: TextField(
+                              keyboardType: TextInputType.number,
+                              onChanged: (value) {
+                                password = value;
+                              },
+                              style: TextStyle(letterSpacing: 1.5),
+                              decoration: InputDecoration(
+                                  hintText: "Password",
+                                  hintStyle: TextStyle(
+                                      color: Colors.grey, letterSpacing: 1.0),
+                                  border: InputBorder.none),
+                            ),
+                          ),
+                          CupertinoDialogAction(
+                            onPressed: () {
+                              _firestore
+                                  .collection('admin')
+                                  .document('admin_doc')
+                                  .get()
+                                  .then((value) {
+                                if (value.data['password'] == password) {
+                                  Navigator.pop(context);
+                                  Navigator.push(context,
+                                      MaterialPageRoute(builder: (_) {
+                                    return Superuser();
+                                  })).whenComplete(() {
+                                    initPending();
+                                    initOnGoing();
+                                  });
+                                } else {
+                                  Fluttertoast.showToast(msg: 'wrong password');
+                                }
+                              });
+                            },
+                            child: Text('Confirm'),
+                          ),
+                          CupertinoDialogAction(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text('Cancel'),
+                          ),
+                        ],
+                      ),
+                    ));
               },
               title: Container(
                   alignment: Alignment.center,
@@ -117,7 +177,25 @@ class _MainPageState extends State<MainPage>
                       borderRadius: BorderRadius.circular(30)),
                   child: Text(
                     'Super User',
-                    style: TextStyle(color: Colors.red.shade500),
+                    style: TextStyle(color: Colors.grey.shade500),
+                  )),
+            ),
+            ListTile(
+              onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (_) {
+                  return Settings(uid: widget.uid);
+                }));
+              },
+              title: Container(
+                  alignment: Alignment.center,
+                  margin: EdgeInsets.only(top: 9),
+                  padding: EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(30)),
+                  child: Text(
+                    'Settings',
+                    style: TextStyle(color: Colors.grey.shade500),
                   )),
             ),
             ListTile(
@@ -204,98 +282,109 @@ class _MainPageState extends State<MainPage>
                                   'Description : ${snapshot.data[index]['description']}'),
                             ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: <Widget>[
-                                FlatButton(
-                                  color: Colors.green.shade500,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(9)),
-                                  onPressed: () async {
-                                    var docId = _firestore
-                                        .collection('onGoing')
-                                        .document()
-                                        .documentID;
-
-                                    await _firestore
-                                        .collection('Users')
-                                        .document(widget.uid)
-                                        .get()
-                                        .then((value) async {
-                                      await value.reference
+                                Expanded(
+                                  flex: 1,
+                                  child: FlatButton(
+                                    color: Colors.green.shade500,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(9)),
+                                    onPressed: () {
+                                      _pendingController.add('waiting');
+                                      var docId = _firestore
                                           .collection('onGoing')
-                                          .document(docId)
-                                          .setData({
-                                        'channel_name': snapshot.data[index]
-                                            ['channel_name'],
-                                        'date': snapshot.data[index]['date'],
-                                        'link': snapshot.data[index]['link'],
-                                        'description': snapshot.data[index]
-                                            ['description'],
-                                        'docId': docId
-                                      });
+                                          .document()
+                                          .documentID;
 
-                                      await _firestore
-                                          .collection('onGoing')
-                                          .document(docId)
-                                          .setData({
-                                        'name': value.data['first_name'] +
-                                            ' ' +
-                                            value.data['last_name'],
-                                        'channel_name': snapshot.data[index]
-                                            ['channel_name'],
-                                        'date': snapshot.data[index]['date'],
-                                        'link': snapshot.data[index]['link'],
-                                        'description': snapshot.data[index]
-                                            ['description'],
-                                        'uid': snapshot.data[index].documentID,
+                                      _firestore
+                                          .collection('Users')
+                                          .document(widget.uid)
+                                          .get()
+                                          .then((value) {
+                                        value.reference
+                                            .collection('onGoing')
+                                            .document(docId)
+                                            .setData({
+                                          'channel_name': snapshot.data[index]
+                                              ['channel_name'],
+                                          'date': snapshot.data[index]['date'],
+                                          'link': snapshot.data[index]['link'],
+                                          'description': snapshot.data[index]
+                                              ['description'],
+                                          'docId': docId
+                                        }).whenComplete(() {
+                                          _firestore
+                                              .collection('onGoing')
+                                              .document(docId)
+                                              .setData({
+                                            'name': value.data['first_name'] +
+                                                ' ' +
+                                                value.data['last_name'],
+                                            'channel_name': snapshot.data[index]
+                                                ['channel_name'],
+                                            'date': snapshot.data[index]
+                                                ['date'],
+                                            'link': snapshot.data[index]
+                                                ['link'],
+                                            'description': snapshot.data[index]
+                                                ['description'],
+                                            'uid':
+                                                snapshot.data[index].documentID,
+                                          }).whenComplete(() {
+                                            _firestore
+                                                .collection('pending')
+                                                .document(snapshot
+                                                    .data[index].documentID)
+                                                .delete();
+                                            _firestore
+                                                .collection('Users')
+                                                .document(widget.uid)
+                                                .collection('pending')
+                                                .document(snapshot
+                                                    .data[index].documentID)
+                                                .delete();
+                                          }).whenComplete(() {
+                                            initPending();
+                                          });
+                                        });
                                       });
-                                      await _firestore
-                                          .collection('pending')
-                                          .document(
-                                              snapshot.data[index].documentID)
-                                          .delete();
-                                      await _firestore
+                                    },
+                                    child: Text(
+                                      'Accept',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 9),
+                                Expanded(
+                                  flex: 1,
+                                  child: FlatButton(
+                                    color: Colors.red,
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(9)),
+                                    onPressed: () {
+                                      _pendingController.add('waiting');
+                                      _firestore
                                           .collection('Users')
                                           .document(widget.uid)
                                           .collection('pending')
                                           .document(
                                               snapshot.data[index].documentID)
-                                          .delete();
-
-                                      initPending();
-                                    });
-                                  },
-                                  child: Text(
-                                    'Accept',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                                FlatButton(
-                                  color: Colors.red,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(9)),
-                                  onPressed: () async {
-                                    await _firestore
-                                        .collection('Users')
-                                        .document(widget.uid)
-                                        .collection('pending')
-                                        .document(
-                                            snapshot.data[index].documentID)
-                                        .delete();
-
-                                    _firestore
-                                        .collection('pending')
-                                        .document(
-                                            snapshot.data[index].documentID)
-                                        .setData({'status': 'rejected'},
-                                            merge: true);
-
-                                    initPending();
-                                  },
-                                  child: Text(
-                                    'Decline',
-                                    style: TextStyle(color: Colors.white),
+                                          .delete()
+                                          .whenComplete(() {
+                                        initPending();
+                                        _firestore
+                                            .collection('pending')
+                                            .document(
+                                                snapshot.data[index].documentID)
+                                            .setData({'status': 'rejected'},
+                                                merge: true);
+                                      });
+                                    },
+                                    child: Text(
+                                      'Decline',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                                   ),
                                 ),
                               ],

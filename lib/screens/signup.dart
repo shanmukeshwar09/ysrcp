@@ -2,9 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ysrcp/screens/main_page.dart';
-import 'package:searchable_dropdown/searchable_dropdown.dart';
 
 class SignUp extends StatefulWidget {
   @override
@@ -12,16 +12,14 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
-  String first_name = '';
-  String last_name = '';
+  String firstName = '';
+  String lastName = '';
   String email = '';
   String password = '';
-  String password_clone = '';
-  String area = '';
+  String passwordClone = '';
   String phone = '';
   bool loading = false;
-  String error = '';
-  String selectedValue = 'Hyderabad';
+  String selectedArea = 'Hyderabad';
 
   String _dateTime;
 
@@ -60,13 +58,6 @@ class _SignUpState extends State<SignUp> {
               )
             : ListView(
                 children: <Widget>[
-                  ListTile(
-                    title: Center(
-                        child: Text(
-                      error,
-                      style: TextStyle(color: Colors.red),
-                    )),
-                  ),
                   Container(
                     margin: EdgeInsets.symmetric(vertical: 9, horizontal: 27),
                     decoration: BoxDecoration(
@@ -89,7 +80,7 @@ class _SignUpState extends State<SignUp> {
                                     bottom:
                                         BorderSide(color: Colors.grey[300]))),
                             child: TextFormField(
-                              onChanged: (value) => first_name = value,
+                              onChanged: (value) => firstName = value,
                               validator: (value) {
                                 return value.length > 1 ? null : 'invalid name';
                               },
@@ -108,7 +99,7 @@ class _SignUpState extends State<SignUp> {
                                     bottom:
                                         BorderSide(color: Colors.grey[300]))),
                             child: TextFormField(
-                              onChanged: (value) => last_name = value,
+                              onChanged: (value) => lastName = value,
                               validator: (value) {
                                 return value.length > 1 ? null : 'invalid name';
                               },
@@ -201,53 +192,36 @@ class _SignUpState extends State<SignUp> {
                               ),
                             ),
                           ),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey[300]))),
-                            child: TextFormField(
-                              onTap: () {
-                                DropdownButton<String>(
-                                    iconEnabledColor: Colors.white,
-                                    style: TextStyle(
-                                        color: Colors.white, fontSize: 25),
-                                    iconSize: 30,
-                                    dropdownColor: Colors.orange[300],
-                                    elevation: 0,
-                                    value: selectedValue,
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        selectedValue = newValue;
-                                      });
-                                    },
-                                    items: <String>['Hyderabad', '2']
-                                        .map<DropdownMenuItem<String>>((e) {
-                                      return DropdownMenuItem<String>(
-                                          value: e,
-                                          child: Text(
-                                            e.toString(),
-                                          ));
-                                    }).toList());
-                              },
-                              enabled: true,
-                              readOnly: true,
-                              //   onChanged: (value) => area = value,
+                          DropdownButtonFormField<String>(
                               decoration: InputDecoration(
-                                hintText: "Area",
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, letterSpacing: 1.0),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.only(top: 16 , bottom: 16 , left: 9)),
+                              isExpanded: true,
+                              iconEnabledColor: Colors.grey,
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 18),
+                              iconSize: 30,
+                              elevation: 9,
+                              value: selectedArea,
+                              onChanged: (newValue) {
+                                setState(() {
+                                  selectedArea = newValue;
+                                });
+                              },
+                              items: <String>['Hyderabad', 'Test', 'Test2']
+                                  .map<DropdownMenuItem<String>>((e) {
+                                return DropdownMenuItem<String>(
+                                    value: e,
+                                    child: Text(
+                                      e.toString(),
+                                    ));
+                              }).toList()),
                           Container(
                             padding: EdgeInsets.all(10),
                             decoration: BoxDecoration(
                                 border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey[200]))),
+                                    bottom: BorderSide(color: Colors.grey[300]),
+                                    top: BorderSide(color: Colors.grey[300]))),
                             child: TextFormField(
                               onChanged: (value) => password = value,
                               validator: (value) {
@@ -280,7 +254,7 @@ class _SignUpState extends State<SignUp> {
                                     bottom:
                                         BorderSide(color: Colors.grey[200]))),
                             child: TextFormField(
-                              onChanged: (value) => password_clone = value,
+                              onChanged: (value) => passwordClone = value,
                               validator: (value) {
                                 return ((value.isEmpty ||
                                         value.length < 6 ||
@@ -354,12 +328,13 @@ class _SignUpState extends State<SignUp> {
       final usersRef =
           Firestore.instance.collection('Users').document(result.user.uid);
       await usersRef.setData({
-        'first_name': first_name.trim(),
-        'last_name': last_name.trim(),
+        'first_name': firstName.trim(),
+        'last_name': lastName.trim(),
         'email': email.trim(),
         'phone': phone.trim(),
-        'area': area.trim(),
-        'dob': _dateTime
+        'area': selectedArea,
+        'dob': _dateTime,
+        'imageUrl': 'null'
       });
       SharedPreferences _pref = await SharedPreferences.getInstance();
       _pref.setString('UID', result.user.uid);
@@ -369,7 +344,7 @@ class _SignUpState extends State<SignUp> {
     } catch (e) {
       setState(() {
         loading = false;
-        error = e.toString();
+        Fluttertoast.showToast(msg: e.toString());
       });
     }
   }

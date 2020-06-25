@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ysrcp/screens/assign_work.dart';
+import 'package:ysrcp/screens/profile_screen.dart';
 
 class AllUsers extends StatefulWidget {
   @override
@@ -112,6 +113,14 @@ class _AllUsersState extends State<AllUsers> {
                                 : Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(18)),
                         child: ListTile(
+                            onLongPress: () {
+                              Navigator.push(context,
+                                  MaterialPageRoute(builder: (_) {
+                                return ProfileScreen(
+                                    uid: snapshot
+                                        .data.documents[index].documentID);
+                              }));
+                            },
                             onTap: () {
                               setState(() {
                                 if (_membersSet.contains(snapshot

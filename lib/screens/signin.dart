@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ysrcp/screens/main_page.dart';
 import 'package:ysrcp/screens/signup.dart';
@@ -14,7 +15,6 @@ class _SignInState extends State<SignIn> {
   String password = '';
   bool hidePassword = true;
   final _formKey = GlobalKey<FormState>();
-  String error = '';
   bool loading = false;
 
   @override
@@ -163,13 +163,6 @@ class _SignInState extends State<SignIn> {
                           style: TextStyle(color: Colors.grey.shade700),
                         ),
                       )),
-                  ListTile(
-                      title: Center(
-                    child: Text(
-                      error,
-                      style: TextStyle(color: Colors.red.shade700),
-                    ),
-                  )),
                 ],
               ),
       ),
@@ -192,7 +185,7 @@ class _SignInState extends State<SignIn> {
     } catch (e) {
       setState(() {
         loading = false;
-        error = e.toString();
+        Fluttertoast.showToast(msg: e.toString());
       });
     }
   }

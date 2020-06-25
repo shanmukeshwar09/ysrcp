@@ -12,10 +12,10 @@ class AssignWork extends StatefulWidget {
 class _AssignWorkState extends State<AssignWork> {
   Firestore _firestore = Firestore.instance;
   String _dateTime = DateTime.now().toString().split(' ')[0];
-  String channelName = '';
   String link = '';
   String des = '';
   bool loading = false;
+  String selectedChannel = 'NTV';
 
   @override
   Widget build(BuildContext context) {
@@ -30,80 +30,89 @@ class _AssignWorkState extends State<AssignWork> {
           elevation: 0,
         ),
         body: Container(
-          width: double.infinity,
-          height: double.infinity,
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(30), topLeft: Radius.circular(30)),
-              color: Colors.white),
-          child: loading
-              ? Center(
-                  child: CircularProgressIndicator(),
-                )
-              : ListView(
-                  children: <Widget>[
+            width: double.infinity,
+            height: double.infinity,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topRight: Radius.circular(30),
+                    topLeft: Radius.circular(30)),
+                color: Colors.white),
+            child: loading
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : ListView(children: <Widget>[
                     Container(
-                      margin: EdgeInsets.only(top: 10),
-                      padding: EdgeInsets.all(10),
-                      child: TextFormField(
-                        onChanged: (value) {
-                          channelName = value;
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade200)),
-                          disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade200)),
-                          hintText: "Channel name",
-                          hintStyle:
-                              TextStyle(color: Colors.grey, letterSpacing: 1.0),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
+                        margin: EdgeInsets.only(top: 10),
+                        padding: EdgeInsets.all(10),
+                        child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.grey.shade100,
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey.shade200)),
+                              disabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey.shade200)),
+                              hintText: _dateTime,
+                              hintStyle: TextStyle(
+                                  color: Colors.grey, letterSpacing: 1.0),
+                              border: InputBorder.none,
+                            ),
+                            isExpanded: true,
+                            iconEnabledColor: Colors.grey,
+                            style: TextStyle(color: Colors.grey, fontSize: 18),
+                            iconSize: 30,
+                            elevation: 9,
+                            value: selectedChannel,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedChannel = newValue;
+                              });
+                            },
+                            items: <String>['NTV', 'Test', 'Test2']
+                                .map<DropdownMenuItem<String>>((e) {
+                              return DropdownMenuItem<String>(
+                                  value: e, child: Text(e.toString()));
+                            }).toList())),
                     Container(
-                      margin: EdgeInsets.only(top: 10),
-                      padding: EdgeInsets.all(10),
-                      child: TextFormField(
-                        readOnly: true,
-                        enabled: true,
-                        onTap: () async {
-                          final result = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime.now(),
-                              lastDate: DateTime(DateTime.now().year + 3));
+                        margin: EdgeInsets.only(top: 10),
+                        padding: EdgeInsets.all(10),
+                        child: TextFormField(
+                            readOnly: true,
+                            enabled: true,
+                            onTap: () async {
+                              final result = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime.now(),
+                                  lastDate: DateTime(DateTime.now().year + 3));
 
-                          if (result != null) {
-                            setState(() {
-                              _dateTime = result.toString().split(' ')[0];
-                            });
-                          }
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade200)),
-                          disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade200)),
-                          hintText: _dateTime,
-                          hintStyle:
-                              TextStyle(color: Colors.grey, letterSpacing: 1.0),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
+                              if (result != null) {
+                                setState(() {
+                                  _dateTime = result.toString().split(' ')[0];
+                                });
+                              }
+                            },
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.grey.shade100,
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey.shade200)),
+                              disabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey.shade200)),
+                              hintText: _dateTime,
+                              hintStyle: TextStyle(
+                                  color: Colors.grey, letterSpacing: 1.0),
+                              border: InputBorder.none,
+                            ))),
                     Container(
                       margin: EdgeInsets.only(top: 10),
                       padding: EdgeInsets.all(10),
@@ -157,31 +166,25 @@ class _AssignWorkState extends State<AssignWork> {
                       ),
                     ),
                     Center(
-                      child: Container(
-                        margin: EdgeInsets.all(18),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(18),
-                            color: Colors.deepOrange),
-                        child: FlatButton(
-                          child: Text(
-                            'Assign',
-                            style: TextStyle(color: Colors.white, fontSize: 18),
-                          ),
-                          onPressed: () {
-                            if (des.length > 0 &&
-                                link.length > 0 &&
-                                channelName.length > 0) {
-                              assignWork();
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-        ));
+                        child: Container(
+                            margin: EdgeInsets.all(18),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 5),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(18),
+                                color: Colors.deepOrange),
+                            child: FlatButton(
+                                child: Text(
+                                  'Assign',
+                                  style: TextStyle(
+                                      color: Colors.white, fontSize: 18),
+                                ),
+                                onPressed: () {
+                                  if (des.length > 0 && link.length > 0) {
+                                    assignWork();
+                                  }
+                                })))
+                  ])));
   }
 
   assignWork() async {
@@ -189,26 +192,25 @@ class _AssignWorkState extends State<AssignWork> {
       loading = true;
     });
 
-    var pushid = _firestore.collection('pending').document().documentID;
-
-    widget.uids.forEach((element) async {
-      await _firestore
-          .collection('Users')
-          .document(element)
-          .get()
-          .then((value) async {
-        await value.reference.collection('pending').document(pushid).setData({
-          'channel_name': channelName,
-          'date': _dateTime,
-          'link': link,
-          'description': des,
-          'docId' : pushid,
-        });
-        await _firestore.collection('pending').document(pushid).setData({
-          'status': 'pending',
-          'channel_name': channelName,
-          'date': _dateTime,
-          'name': value.data['first_name'] + ' ' + value.data['last_name']
+    widget.uids.forEach((element) {
+      _firestore.collection('pending').document().get().then((doc) {
+        _firestore.collection('Users').document(element).get().then((value) {
+          value.reference
+              .collection('pending')
+              .document(doc.documentID)
+              .setData({
+            'channel_name': selectedChannel,
+            'date': _dateTime,
+            'link': link,
+            'description': des,
+          }).whenComplete(() {
+            _firestore.collection('pending').document(doc.documentID).setData({
+              'status': 'pending',
+              'channel_name': selectedChannel,
+              'date': _dateTime,
+              'name': value.data['first_name'] + ' ' + value.data['last_name']
+            });
+          });
         });
       });
     });

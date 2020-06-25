@@ -89,8 +89,8 @@ class _SuperuserState extends State<Superuser>
         elevation: 0,
         bottom: TabBar(
           indicatorColor: Colors.transparent,
-          labelColor: Colors.grey,
-          unselectedLabelColor: Colors.white,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.white54,
           tabs: [
             Tab(text: 'Pending'),
             Tab(text: 'OnGoing'),
@@ -105,7 +105,12 @@ class _SuperuserState extends State<Superuser>
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) {
             return AllUsers();
-          }));
+          })).whenComplete(() {
+            initPending();
+            initRequests();
+            initOnGoingStream();
+            initFinal();
+          });
         },
       ),
       body: TabBarView(
@@ -154,26 +159,48 @@ class _SuperuserState extends State<Superuser>
                           color: Colors.grey.shade200,
                           borderRadius: BorderRadius.circular(18)),
                       child: ListTile(
-                        title: Text(snapshot.data[index]['name']),
+                        title: Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.all(9),
+                            child: Text(snapshot.data[index]['name'])),
                         subtitle: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  'Channel Name : ${snapshot.data[index]['channel_name']}'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  'Date : ${snapshot.data[index]['date']}'),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text(
+                                  'Status : ${snapshot.data[index]['status']}'),
+                            ),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text(snapshot.data[index]['channel_name']),
-                                Text(
-                                  snapshot.data[index]['date'],
+                                Expanded(
+                                  child: FlatButton(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(18)),
+                                      color: Colors.red.shade300,
+                                      child: Text(
+                                        'Delete',
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 18),
+                                      ),
+                                      onPressed: () {
+                                        // _firestore.collection(path)
+                                      }),
                                 ),
                               ],
-                            ),
-                            Text('Status : ${snapshot.data[index]['status']}'),
+                            )
                           ],
-                        ),
-                        trailing: IconButton(
-                          padding: EdgeInsets.zero,
-                          icon: Icon(Icons.more_horiz),
-                          onPressed: () {},
                         ),
                       ),
                     );
@@ -334,8 +361,6 @@ class _SuperuserState extends State<Superuser>
                                   borderRadius: BorderRadius.circular(18)),
                               color: Colors.green.shade500,
                               onPressed: () async {
-                               
-
                                 await _firestore
                                     .collection('requests')
                                     .document(snapshot.data[index].documentID)
