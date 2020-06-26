@@ -6,8 +6,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:ysrcp/screens/full_screen.dart';
 
 class Settings extends StatefulWidget {
@@ -109,8 +111,8 @@ class _SettingsState extends State<Settings> {
                               left: 70,
                               child: IconButton(
                                 icon: Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.blueGrey,
+                                  MdiIcons.cameraOutline,
+                                  color: Colors.deepOrangeAccent,
                                   size: 36,
                                 ),
                                 onPressed: () {

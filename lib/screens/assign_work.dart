@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ysrcp/service/notifications.dart';
 
 class AssignWork extends StatefulWidget {
   final Set uids;
@@ -47,6 +49,7 @@ class _AssignWorkState extends State<AssignWork> {
                         padding: EdgeInsets.all(10),
                         child: DropdownButtonFormField<String>(
                             decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(9),
                               filled: true,
                               fillColor: Colors.grey.shade100,
                               enabledBorder: OutlineInputBorder(
@@ -73,7 +76,7 @@ class _AssignWorkState extends State<AssignWork> {
                                 selectedChannel = newValue;
                               });
                             },
-                            items: <String>['NTV', 'Test', 'Test2']
+                            items: <String>['NTV', 'ETV', 'TV5', 'SAKSHI']
                                 .map<DropdownMenuItem<String>>((e) {
                               return DropdownMenuItem<String>(
                                   value: e, child: Text(e.toString()));
@@ -114,32 +117,7 @@ class _AssignWorkState extends State<AssignWork> {
                               border: InputBorder.none,
                             ))),
                     Container(
-                      margin: EdgeInsets.only(top: 10),
-                      padding: EdgeInsets.all(10),
-                      child: TextFormField(
-                        onChanged: (value) {
-                          link = value;
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade200)),
-                          disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade200)),
-                          hintText: "Youtube Link",
-                          hintStyle:
-                              TextStyle(color: Colors.grey, letterSpacing: 1.0),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      height: 300,
+                      height: 180,
                       margin: EdgeInsets.only(top: 10),
                       padding: EdgeInsets.all(10),
                       child: TextFormField(
@@ -158,7 +136,7 @@ class _AssignWorkState extends State<AssignWork> {
                               borderRadius: BorderRadius.circular(30),
                               borderSide:
                                   BorderSide(color: Colors.grey.shade200)),
-                          hintText: "Description",
+                          hintText: "Agenda",
                           hintStyle:
                               TextStyle(color: Colors.grey, letterSpacing: 1.0),
                           border: InputBorder.none,
@@ -166,54 +144,53 @@ class _AssignWorkState extends State<AssignWork> {
                       ),
                     ),
                     Center(
-                        child: Container(
-                            margin: EdgeInsets.all(18),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 5),
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(18),
-                                color: Colors.deepOrange),
-                            child: FlatButton(
-                                child: Text(
-                                  'Assign',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 18),
-                                ),
-                                onPressed: () {
-                                  if (des.length > 0 && link.length > 0) {
-                                    assignWork();
-                                  }
-                                })))
+                        child: FlatButton(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18)),
+                            color: Colors.deepOrange,
+                            padding: EdgeInsets.all(9),
+                            child: Text(
+                              'Assign',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 18),
+                            ),
+                            onPressed: () {
+                              if (des.length > 0) {
+                                assignWork();
+                              }
+                            }))
                   ])));
   }
 
-  assignWork() async {
+  assignWork() {
     setState(() {
       loading = true;
     });
 
-    widget.uids.forEach((element) {
-      _firestore.collection('pending').document().get().then((doc) {
-        _firestore.collection('Users').document(element).get().then((value) {
-          value.reference
-              .collection('pending')
-              .document(doc.documentID)
-              .setData({
-            'channel_name': selectedChannel,
-            'date': _dateTime,
-            'link': link,
-            'description': des,
-          }).whenComplete(() {
-            _firestore.collection('pending').document(doc.documentID).setData({
-              'status': 'pending',
-              'channel_name': selectedChannel,
-              'date': _dateTime,
-              'name': value.data['first_name'] + ' ' + value.data['last_name']
-            });
-          });
+    widget.uids.forEach((element) async {
+      final docId = DateTime.now().millisecondsSinceEpoch.toString();
+      await _firestore.collection('pending').document(docId).setData({
+        'channel_name': selectedChannel,
+        'date': _dateTime,
+        'agenda': des,
+        'uid': element,
+        'status': 'pending'
+      }).whenComplete(() {
+        _firestore
+            .collection('Users')
+            .document(element)
+            .collection('pending')
+            .document(docId)
+            .setData({
+          'channel_name': selectedChannel,
+          'date': _dateTime,
+          'agenda': des,
+        }).whenComplete(() {
+          Notifications().pushNotification('New meeting', des, element);
         });
       });
+      Fluttertoast.showToast(msg: 'Done !');
+      Navigator.pop(context);
     });
-    Navigator.pop(context);
   }
 }

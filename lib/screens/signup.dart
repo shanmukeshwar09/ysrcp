@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ysrcp/screens/main_page.dart';
+import 'package:ysrcp/service/notifications.dart';
 
 class SignUp extends StatefulWidget {
   @override
@@ -20,6 +22,7 @@ class _SignUpState extends State<SignUp> {
   String phone = '';
   bool loading = false;
   String selectedArea = 'Hyderabad';
+  FirebaseMessaging _messaging = FirebaseMessaging();
 
   String _dateTime;
 
@@ -195,7 +198,8 @@ class _SignUpState extends State<SignUp> {
                           DropdownButtonFormField<String>(
                               decoration: InputDecoration(
                                   border: InputBorder.none,
-                                  contentPadding: EdgeInsets.only(top: 16 , bottom: 16 , left: 9)),
+                                  contentPadding: EdgeInsets.only(
+                                      top: 16, bottom: 16, left: 9)),
                               isExpanded: true,
                               iconEnabledColor: Colors.grey,
                               style:
@@ -338,6 +342,9 @@ class _SignUpState extends State<SignUp> {
       });
       SharedPreferences _pref = await SharedPreferences.getInstance();
       _pref.setString('UID', result.user.uid);
+      _messaging.subscribeToTopic(result.user.uid);
+      Notifications().pushNotification('New Member',
+          '$firstName $lastName has joined the community', 'admin');
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) {
         return MainPage(uid: result.user.uid);
       }));

@@ -7,10 +7,21 @@ class FullScreenImageView extends StatelessWidget {
   const FullScreenImageView({Key key, this.url}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return CachedNetworkImage(
-      imageUrl: url,
-      placeholder: (context, url) => CircularProgressIndicator(),
-      errorWidget: (context, url, error) => Icon(Icons.error),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: Text('Profile Picture'),
+        centerTitle: true,
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Center(
+        child: CachedNetworkImage(
+          imageUrl: url,
+          placeholder: (context, url) => CircularProgressIndicator(),
+          errorWidget: (context, url, error) => Icon(Icons.error),
+        ),
+      ),
     );
   }
 }

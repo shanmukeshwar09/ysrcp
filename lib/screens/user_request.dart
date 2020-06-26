@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ysrcp/service/notifications.dart';
 
 class UserRequest extends StatefulWidget {
   final uid;
@@ -12,7 +14,7 @@ class UserRequest extends StatefulWidget {
 class _UserRequestState extends State<UserRequest> {
   Firestore _firestore = Firestore.instance;
   String _dateTime = DateTime.now().toString().split(' ')[0];
-  String channelName = '';
+  String selectedChannel = 'NTV';
   String link = '';
   String des = '';
   bool loading = false;
@@ -43,30 +45,42 @@ class _UserRequestState extends State<UserRequest> {
               : ListView(
                   children: <Widget>[
                     Container(
-                      margin: EdgeInsets.only(top: 10),
-                      padding: EdgeInsets.all(10),
-                      child: TextFormField(
-                        onChanged: (value) {
-                          channelName = value;
-                        },
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor: Colors.grey.shade100,
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade200)),
-                          disabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide:
-                                  BorderSide(color: Colors.grey.shade200)),
-                          hintText: "Channel name",
-                          hintStyle:
-                              TextStyle(color: Colors.grey, letterSpacing: 1.0),
-                          border: InputBorder.none,
-                        ),
-                      ),
-                    ),
+                        margin: EdgeInsets.only(top: 10),
+                        padding: EdgeInsets.all(10),
+                        child: DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              contentPadding: EdgeInsets.all(9),
+                              filled: true,
+                              fillColor: Colors.grey.shade100,
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey.shade200)),
+                              disabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey.shade200)),
+                              hintText: _dateTime,
+                              hintStyle: TextStyle(
+                                  color: Colors.grey, letterSpacing: 1.0),
+                              border: InputBorder.none,
+                            ),
+                            isExpanded: true,
+                            iconEnabledColor: Colors.grey,
+                            style: TextStyle(color: Colors.grey, fontSize: 18),
+                            iconSize: 30,
+                            elevation: 9,
+                            value: selectedChannel,
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedChannel = newValue;
+                              });
+                            },
+                            items: <String>['NTV', 'Test', 'Test2']
+                                .map<DropdownMenuItem<String>>((e) {
+                              return DropdownMenuItem<String>(
+                                  value: e, child: Text(e.toString()));
+                            }).toList())),
                     Container(
                       margin: EdgeInsets.only(top: 10),
                       padding: EdgeInsets.all(10),
@@ -157,25 +171,19 @@ class _UserRequestState extends State<UserRequest> {
                       ),
                     ),
                     Center(
-                      child: Container(
-                        margin: EdgeInsets.all(18),
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(18),
-                            color: Colors.deepOrange),
-                        child: FlatButton(
-                          child: Text(
-                            'Request',
-                            style: TextStyle(color: Colors.white, fontSize: 18),
-                          ),
-                          onPressed: () {
-                            if (des.length > 0 &&
-                                link.length > 0 &&
-                                channelName.length > 0) {
-                              request();
-                            }
-                          },
+                      child: RaisedButton(
+                        padding: EdgeInsets.all(12),
+                        onPressed: () {
+                          if (des.length > 0 && link.length > 0) {
+                            request();
+                          }
+                        },
+                        color: Colors.deepOrange,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18)),
+                        child: Text(
+                          'Request',
+                          style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
                       ),
                     ),
@@ -185,24 +193,25 @@ class _UserRequestState extends State<UserRequest> {
   }
 
   request() async {
-    setState(() {
-      loading = true;
-    });
+    if (des.length > 15 && link.length > 3) {
+      setState(() {
+        loading = true;
+      });
 
-    await _firestore
-        .collection('Users')
-        .document(widget.uid)
-        .get()
-        .then((value) {
       _firestore.collection('requests').document().setData({
-        'channel_name': channelName,
-        'date': _dateTime,
+        'channel_name': selectedChannel,
         'link': link,
         'description': des,
-        'name': value.data['first_name'] + ' ' + value.data['last_name']
+        'date': _dateTime,
+        'uid': widget.uid,
+        'agenda': 'null'
+      }).whenComplete(() {
+        Notifications().pushNotification('New Request', des, 'admin');
+        Fluttertoast.showToast(msg: 'Done !');
+        Navigator.pop(context);
       });
-    });
-
-    Navigator.pop(context);
+    } else {
+      Fluttertoast.showToast(msg: 'Incomplete Fields');
+    }
   }
 }

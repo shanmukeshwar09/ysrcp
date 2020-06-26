@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,7 @@ class _SignInState extends State<SignIn> {
   bool hidePassword = true;
   final _formKey = GlobalKey<FormState>();
   bool loading = false;
+  FirebaseMessaging _messaging = FirebaseMessaging();
 
   @override
   Widget build(BuildContext context) {
@@ -179,6 +181,7 @@ class _SignInState extends State<SignIn> {
           email: email.trim(), password: password.trim());
       SharedPreferences _pref = await SharedPreferences.getInstance();
       _pref.setString('UID', result.user.uid);
+      _messaging.subscribeToTopic(result.user.uid);
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) {
         return MainPage(uid: result.user.uid);
       }));

@@ -38,6 +38,9 @@ dependencies:
   material_design_icons_flutter: ^4.0.5345  
   cached_network_image: ^2.2.0+1
   fluttertoast: ^4.0.1
+  firebase_messaging: ^6.0.16
+  flutter_local_notifications: ^1.4.4+1
+  pin_entry_text_field: ^0.1.4
 
 
  
