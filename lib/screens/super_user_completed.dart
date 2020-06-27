@@ -11,7 +11,7 @@ class _SuperUserCompletedState extends State<SuperUserCompleted> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.green,
         appBar: AppBar(
           title: Text('Completed', style: TextStyle(fontSize: 23)),
           centerTitle: true,

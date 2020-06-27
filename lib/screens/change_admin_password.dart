@@ -22,7 +22,7 @@ class _ChangeAdminPasswordState extends State<ChangeAdminPassword> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.green,
         appBar: AppBar(
           title: Text(
             'Change Password',

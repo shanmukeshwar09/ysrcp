@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -32,30 +35,43 @@ class _MainPageState extends State<MainPage>
 
   Future _showNotification(String title, String body) async {
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
-        'channel_ID', 'channel name', 'channel description',
-        importance: Importance.Max,
-        priority: Priority.High,
-        ticker: 'test ticker');
+      'channel_ID',
+      'channel name',
+      'channel description',
+      importance: Importance.Max,
+      priority: Priority.High,
+    );
 
     var iOSChannelSpecifics = IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, iOSChannelSpecifics);
 
     await flutterLocalNotificationsPlugin.show(
-        0, title, body, platformChannelSpecifics,
-        payload: 'test payload');
+      Random().nextInt(1000),
+      title,
+      body,
+      platformChannelSpecifics,
+    );
   }
 
   @override
   void initState() {
     _tabController = new TabController(length: 3, vsync: this);
+
     super.initState();
 
     initializationSettingsAndroid =
         new AndroidInitializationSettings('app_icon');
+    initializationSettingsIOS = new IOSInitializationSettings();
+    initializationSettings = new InitializationSettings(
+        initializationSettingsAndroid, initializationSettingsIOS);
+    flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+    );
 
     _firebaseMessaging.configure(
         onMessage: (Map<String, dynamic> message) async {
+          print(message);
           _showNotification(message['data']['title'], message['data']['body']);
         },
         onLaunch: (Map<String, dynamic> message) async {},
@@ -65,7 +81,7 @@ class _MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepOrange,
+      backgroundColor: Colors.green,
       appBar: AppBar(
         title: Text(
           'YSRCP',
@@ -96,71 +112,167 @@ class _MainPageState extends State<MainPage>
         },
       ),
       drawer: Drawer(
-        elevation: 50,
-        child: Column(
-          children: <Widget>[
-            DrawerHeader(child: Text('//TODO YSRCP LOGO')),
-            ListTile(
-              onTap: () {
-                Navigator.push(
-                    context, MaterialPageRoute(builder: (_) => Authenticate()));
-              },
-              title: Container(
-                  alignment: Alignment.center,
-                  margin: EdgeInsets.only(top: 9),
-                  padding: EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(30)),
-                  child: Text(
-                    'Super User',
-                    style: TextStyle(color: Colors.grey.shade500),
-                  )),
-            ),
-            ListTile(
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (_) {
-                  return Settings(uid: widget.uid);
-                }));
-              },
-              title: Container(
-                  alignment: Alignment.center,
-                  margin: EdgeInsets.only(top: 9),
-                  padding: EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(30)),
-                  child: Text(
-                    'Settings',
-                    style: TextStyle(color: Colors.grey.shade500),
-                  )),
-            ),
-            ListTile(
-              onTap: () async {
-                final SharedPreferences _pref =
-                    await SharedPreferences.getInstance();
-                await _pref.clear();
-                _firebaseMessaging.unsubscribeFromTopic(widget.uid);
-                _firebaseMessaging.unsubscribeFromTopic('admin');
-                Navigator.pushReplacement(context,
-                    MaterialPageRoute(builder: (_) {
-                  return SignIn();
-                }));
-              },
-              title: Container(
-                  alignment: Alignment.center,
-                  margin: EdgeInsets.only(top: 9),
-                  padding: EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
-                      borderRadius: BorderRadius.circular(30)),
-                  child: Text(
-                    'Logout',
-                    style: TextStyle(color: Colors.red.shade500),
-                  )),
-            )
-          ],
-        ),
+        elevation: 30,
+        child: StreamBuilder<DocumentSnapshot>(
+            stream: Firestore.instance
+                .collection('Users')
+                .document(widget.uid)
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                return ListView(
+                  children: <Widget>[
+                    Container(
+                      height: 250,
+                    //  width: 250,
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                        fit: BoxFit.fill,
+                        image: (snapshot.data['imageUrl'] == 'null')
+                            ? AssetImage('assets/circular_avatar.png')
+                            : CachedNetworkImageProvider(
+                                snapshot.data['imageUrl']),
+                      )),
+                    ),
+                    SizedBox(height: 30),
+                    Container(
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.only(top: 9),
+                      padding: EdgeInsets.all(9),
+                      decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(30)),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (_) {
+                            return Settings(uid: widget.uid);
+                          }));
+                        },
+                        title: Text(
+                          snapshot.data.data['first_name'] +
+                              ' ' +
+                              snapshot.data.data['last_name'],
+                          style: TextStyle(color: Colors.grey.shade700),
+                        ),
+                        trailing: Text(
+                          'name',
+                          style: TextStyle(color: Colors.grey.shade500),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 9),
+                      padding: EdgeInsets.all(9),
+                      decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(30)),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (_) {
+                            return Settings(uid: widget.uid);
+                          }));
+                        },
+                        title: Text(
+                          snapshot.data.data['bio'],
+                          style: TextStyle(color: Colors.grey.shade700),
+                        ),
+                        trailing: Text(
+                          'bio',
+                          style: TextStyle(color: Colors.grey.shade500),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 9),
+                      padding: EdgeInsets.all(9),
+                      decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(30)),
+                      child: ListTile(
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (_) {
+                            return Settings(uid: widget.uid);
+                          }));
+                        },
+                        title: Text(
+                          snapshot.data.data['area'],
+                          style: TextStyle(color: Colors.grey.shade700),
+                        ),
+                        trailing: Text(
+                          'Area',
+                          style: TextStyle(color: Colors.grey.shade500),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 30),
+                    ListTile(
+                      onTap: () {
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => Authenticate()));
+                      },
+                      title: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(top: 9),
+                          padding: EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(30)),
+                          child: Text(
+                            'Super User',
+                            style: TextStyle(color: Colors.grey.shade500),
+                          )),
+                    ),
+                    ListTile(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (_) {
+                          return Settings(uid: widget.uid);
+                        }));
+                      },
+                      title: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(top: 9),
+                          padding: EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(30)),
+                          child: Text(
+                            'Settings',
+                            style: TextStyle(color: Colors.grey.shade500),
+                          )),
+                    ),
+                    ListTile(
+                      onTap: () async {
+                        final SharedPreferences _pref =
+                            await SharedPreferences.getInstance();
+                        await _pref.clear();
+                        _firebaseMessaging.unsubscribeFromTopic(widget.uid);
+                        _firebaseMessaging.unsubscribeFromTopic('admin');
+                        Navigator.pushReplacement(context,
+                            MaterialPageRoute(builder: (_) {
+                          return SignIn();
+                        }));
+                      },
+                      title: Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.only(top: 9),
+                          padding: EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                              color: Colors.grey.shade100,
+                              borderRadius: BorderRadius.circular(30)),
+                          child: Text(
+                            'Logout',
+                            style: TextStyle(color: Colors.red.shade500),
+                          )),
+                    )
+                  ],
+                );
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            }),
       ),
       body: TabBarView(
         children: [

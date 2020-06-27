@@ -22,7 +22,7 @@ class _UserRequestState extends State<UserRequest> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.green,
         appBar: AppBar(
           title: Text(
             'Assign Meeting',
@@ -76,8 +76,25 @@ class _UserRequestState extends State<UserRequest> {
                                 selectedChannel = newValue;
                               });
                             },
-                            items: <String>['NTV', 'Test', 'Test2']
-                                .map<DropdownMenuItem<String>>((e) {
+                            items: <String>[
+                              'NTV',
+                              'SAKSHI',
+                              'TV19',
+                              'AP27/7',
+                              'I\'NEWS',
+                              '10TV',
+                              'TV99',
+                              'HMTV',
+                              'PRIME99',
+                              '6TV',
+                              'ABN',
+                              'BHARAT TODAY',
+                              'MOJOTV',
+                              'TV5',
+                              'STUDIO N',
+                              '10 TV',
+                              'MAHA NEWS',
+                            ].map<DropdownMenuItem<String>>((e) {
                               return DropdownMenuItem<String>(
                                   value: e, child: Text(e.toString()));
                             }).toList())),

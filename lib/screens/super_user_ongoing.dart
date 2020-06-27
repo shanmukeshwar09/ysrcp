@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ysrcp/screens/additional_add.dart';
 import 'package:ysrcp/screens/full_screen.dart';
 import 'package:ysrcp/screens/profile_screen.dart';
+import 'package:ysrcp/service/notifications.dart';
 
 class SuperUserOnGoing extends StatefulWidget {
   @override
@@ -16,7 +17,7 @@ class _SuperUserOnGoingState extends State<SuperUserOnGoing> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.green,
         appBar: AppBar(
           title: Text('Ongoing', style: TextStyle(fontSize: 25)),
           centerTitle: true,
@@ -161,6 +162,11 @@ class _SuperUserOnGoingState extends State<SuperUserOnGoing> {
                                                                       index]
                                                                   .reference
                                                                   .delete();
+                                                              Notifications().pushNotification(
+                                                                  'Debate Cancelled',
+                                                                  '${snapshot.data.documents[index].data['agenda']}',
+                                                                  userSnap.data
+                                                                      .documentID);
                                                               userSnap.data
                                                                   .reference
                                                                   .collection(

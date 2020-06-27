@@ -28,9 +28,17 @@ class _SettingsState extends State<Settings> {
   Firestore _firestore = Firestore.instance;
 
   @override
+  void initState() {
+    FirebaseAuth.instance.currentUser().then((value) {
+      _firebaseUser = value;
+    });
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Colors.blue,
         appBar: AppBar(
           title: Text(
             'Settings',
@@ -111,16 +119,24 @@ class _SettingsState extends State<Settings> {
                     ),
                     GestureDetector(
                         onTap: () {
-                          showTile('first', 'first_name', snapshot.data);
+                          showTile(
+                              'Change first name', 'first_name', snapshot.data);
                         },
                         child: getApproprateTile(
                             snapshot.data.data['first_name'], 'First name')),
                     GestureDetector(
                         onTap: () {
-                          showTile('last', 'last_name', snapshot.data);
+                          showTile(
+                              'Change last name', 'last_name', snapshot.data);
                         },
                         child: getApproprateTile(
                             snapshot.data.data['last_name'], 'Last name')),
+                    GestureDetector(
+                        onTap: () {
+                          showTile('Change Bio', 'bio', snapshot.data);
+                        },
+                        child: getApproprateTile(
+                            snapshot.data.data['bio'], 'Bio')),
                     GestureDetector(
                         onTap: () {},
                         child: getApproprateTile(
@@ -135,7 +151,8 @@ class _SettingsState extends State<Settings> {
                             snapshot.data.data['area'], 'Area')),
                     GestureDetector(
                         onTap: () {},
-                        child: getApproprateTile(_firebaseUser.email, 'Email')),
+                        child: getApproprateTile(
+                            snapshot.data.data['email'], 'Email')),
                     GestureDetector(
                         onTap: () async {
                           await _auth.sendPasswordResetEmail(
@@ -174,7 +191,7 @@ class _SettingsState extends State<Settings> {
           backgroundColor: Colors.transparent,
           body: CupertinoAlertDialog(
             title: Text(
-              'Change $agenda name',
+              '$agenda',
               style: TextStyle(
                   color: Colors.deepOrange,
                   fontWeight: FontWeight.bold,

@@ -16,7 +16,7 @@ class _SuperUserPendingState extends State<SuperUserPending> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: Colors.green,
         appBar: AppBar(
           title: Text('Pending', style: TextStyle(fontSize: 23)),
           centerTitle: true,

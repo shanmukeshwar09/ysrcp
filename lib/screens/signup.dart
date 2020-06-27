@@ -20,6 +20,7 @@ class _SignUpState extends State<SignUp> {
   String password = '';
   String passwordClone = '';
   String phone = '';
+  String bio = '';
   bool loading = false;
   String selectedArea = 'Hyderabad';
   FirebaseMessaging _messaging = FirebaseMessaging();
@@ -38,7 +39,7 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.deepOrange,
+      backgroundColor: Colors.blue,
       appBar: AppBar(
         title: Text(
           'Register',
@@ -195,6 +196,28 @@ class _SignUpState extends State<SignUp> {
                               ),
                             ),
                           ),
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                                border: Border(
+                                    bottom:
+                                        BorderSide(color: Colors.grey[300]))),
+                            child: TextFormField(
+                              onChanged: (value) => bio = value,
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                return (value.length < 5)
+                                    ? 'Invalid Bio'
+                                    : null;
+                              },
+                              decoration: InputDecoration(
+                                hintText: "Bio",
+                                hintStyle: TextStyle(
+                                    color: Colors.grey, letterSpacing: 1.0),
+                                border: InputBorder.none,
+                              ),
+                            ),
+                          ),
                           DropdownButtonFormField<String>(
                               decoration: InputDecoration(
                                   border: InputBorder.none,
@@ -212,8 +235,15 @@ class _SignUpState extends State<SignUp> {
                                   selectedArea = newValue;
                                 });
                               },
-                              items: <String>['Hyderabad', 'Test', 'Test2']
-                                  .map<DropdownMenuItem<String>>((e) {
+                              items: <String>[
+                                'Hyderabad',
+                                'Test83',
+                                'Test82',
+                                'Test45',
+                                'Test91',
+                                'Test24',
+                                'Test09'
+                              ].map<DropdownMenuItem<String>>((e) {
                                 return DropdownMenuItem<String>(
                                     value: e,
                                     child: Text(
@@ -239,7 +269,7 @@ class _SignUpState extends State<SignUp> {
                                   hintText: "Password",
                                   suffixIcon: IconButton(
                                     icon: Icon(Icons.remove_red_eye,
-                                        color: Colors.deepOrangeAccent),
+                                        color: Colors.blue),
                                     onPressed: () {
                                       setState(() {
                                         hidePassword = !hidePassword;
@@ -272,7 +302,7 @@ class _SignUpState extends State<SignUp> {
                                   hintText: "Re-Enter Password",
                                   suffixIcon: IconButton(
                                     icon: Icon(Icons.remove_red_eye,
-                                        color: Colors.deepOrangeAccent),
+                                        color: Colors.blue),
                                     onPressed: () {
                                       setState(() {
                                         hidePassword = !hidePassword;
@@ -299,7 +329,7 @@ class _SignUpState extends State<SignUp> {
                         padding: EdgeInsets.all(18),
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(27),
-                            color: Colors.deepOrange),
+                            color: Colors.blue),
                         child: Text(
                           'Register',
                           style: TextStyle(color: Colors.white, fontSize: 18),
@@ -338,6 +368,7 @@ class _SignUpState extends State<SignUp> {
         'phone': phone.trim(),
         'area': selectedArea,
         'dob': _dateTime,
+        'bio': bio,
         'imageUrl': 'null'
       });
       SharedPreferences _pref = await SharedPreferences.getInstance();
