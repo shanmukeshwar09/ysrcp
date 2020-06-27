@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ysrcp/screens/full_screen.dart';
 import 'package:ysrcp/screens/profile_screen.dart';
+import 'package:ysrcp/service/notifications.dart';
 
 class SuperUserRequests extends StatefulWidget {
   @override
@@ -214,6 +215,48 @@ class _SuperUserRequestsState extends State<SuperUserRequests> {
                                                                 onPressed: () {
                                                                   _firestore
                                                                       .collection(
+                                                                          'Users')
+                                                                      .document(userSnap
+                                                                          .data
+                                                                          .documentID)
+                                                                      .collection(
+                                                                          'completed')
+                                                                      .document()
+                                                                      .setData({
+                                                                    'Member': userSnap.data.data[
+                                                                            'first_name'] +
+                                                                        ' ' +
+                                                                        userSnap
+                                                                            .data
+                                                                            .data['last_name'],
+                                                                    'Channel': snapshot
+                                                                        .data
+                                                                        .documents[
+                                                                            index]
+                                                                        .data['channel_name'],
+                                                                    'Agenda': snapshot
+                                                                        .data
+                                                                        .documents[
+                                                                            index]
+                                                                        .data['agenda'],
+                                                                    'Date': snapshot
+                                                                        .data
+                                                                        .documents[
+                                                                            index]
+                                                                        .data['date'],
+                                                                    'Description': snapshot
+                                                                        .data
+                                                                        .documents[
+                                                                            index]
+                                                                        .data['description'],
+                                                                    'Link': snapshot
+                                                                        .data
+                                                                        .documents[
+                                                                            index]
+                                                                        .data['link']
+                                                                  });
+                                                                  _firestore
+                                                                      .collection(
                                                                           'final')
                                                                       .document(snapshot
                                                                           .data
@@ -252,12 +295,21 @@ class _SuperUserRequestsState extends State<SuperUserRequests> {
                                                                         .documents[
                                                                             index]
                                                                         .data['link']
-                                                                  }).whenComplete(() => snapshot
-                                                                          .data
-                                                                          .documents[
-                                                                              index]
-                                                                          .reference
-                                                                          .delete());
+                                                                  }).whenComplete(
+                                                                          () {
+                                                                    Notifications().pushNotification(
+                                                                        'Request Approved',
+                                                                        'Agenda ${snapshot.data.documents[index].data['description']}',
+                                                                        userSnap
+                                                                            .data
+                                                                            .documentID);
+                                                                    snapshot
+                                                                        .data
+                                                                        .documents[
+                                                                            index]
+                                                                        .reference
+                                                                        .delete();
+                                                                  });
                                                                 }),
                                                           ),
                                                         ],

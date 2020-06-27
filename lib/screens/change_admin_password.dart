@@ -16,6 +16,8 @@ class _ChangeAdminPasswordState extends State<ChangeAdminPassword> {
   String pin2 = '';
   bool isChecking = false;
   bool isChanging = false;
+  bool isAuthenticated = false;
+
   Firestore _firestore = Firestore.instance;
   @override
   Widget build(BuildContext context) {
@@ -56,6 +58,7 @@ class _ChangeAdminPasswordState extends State<ChangeAdminPassword> {
                       setState(() {
                         isChecking = false;
                         error = 'Authentication Sucessfull';
+                        isAuthenticated = true;
                       });
                     } else {
                       setState(() {
@@ -75,45 +78,53 @@ class _ChangeAdminPasswordState extends State<ChangeAdminPassword> {
                               ? Colors.red.shade300
                               : Colors.green.shade300)),
               SizedBox(height: 18),
-              Container(
-                  margin: EdgeInsets.all(9),
-                  child: Text('Enter new PIN',
-                      style: TextStyle(color: Colors.grey.shade700))),
-              PinEntryTextField(
-                isTextObscure: true,
-                onSubmit: (value) {
-                  pin1 = value;
-                },
-              ),
+              isAuthenticated
+                  ? Container(
+                      margin: EdgeInsets.all(9),
+                      child: Text('Enter new PIN',
+                          style: TextStyle(color: Colors.grey.shade700)))
+                  : SizedBox(),
+              isAuthenticated
+                  ? PinEntryTextField(
+                      isTextObscure: true,
+                      onSubmit: (value) {
+                        pin1 = value;
+                      },
+                    )
+                  : SizedBox(),
               SizedBox(height: 18),
-              Container(
-                  margin: EdgeInsets.all(9),
-                  child: Text('Confirm PIN',
-                      style: TextStyle(color: Colors.grey.shade700))),
-              PinEntryTextField(
-                isTextObscure: true,
-                onSubmit: (value) {
-                  pin2 = value;
-                  if (pin1 == pin2) {
-                    setState(() {
-                      isChanging = true;
-                    });
-                    _firestore
-                        .collection('admin')
-                        .document('admin_doc')
-                        .setData({
-                      'password': pin1,
-                    }).whenComplete(() {
-                      Fluttertoast.showToast(msg: 'Password Changed');
-                      Navigator.pop(context);
-                    });
-                  } else {
-                    setState(() {
-                      changeError = 'un-matched passwords';
-                    });
-                  }
-                },
-              ),
+              isAuthenticated
+                  ? Container(
+                      margin: EdgeInsets.all(9),
+                      child: Text('Confirm PIN',
+                          style: TextStyle(color: Colors.grey.shade700)))
+                  : SizedBox(),
+              isAuthenticated
+                  ? PinEntryTextField(
+                      isTextObscure: true,
+                      onSubmit: (value) {
+                        pin2 = value;
+                        if (pin1 == pin2) {
+                          setState(() {
+                            isChanging = true;
+                          });
+                          _firestore
+                              .collection('admin')
+                              .document('admin_doc')
+                              .setData({
+                            'password': pin1,
+                          }).whenComplete(() {
+                            Fluttertoast.showToast(msg: 'Password Changed');
+                            Navigator.pop(context);
+                          });
+                        } else {
+                          setState(() {
+                            changeError = 'un-matched passwords';
+                          });
+                        }
+                      },
+                    )
+                  : SizedBox(),
               SizedBox(height: 25),
               isChanging
                   ? Center(child: CircularProgressIndicator())

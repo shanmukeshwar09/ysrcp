@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -26,25 +25,7 @@ class _SettingsState extends State<Settings> {
       FirebaseStorage.instance.ref().child('profile_pictures');
   FirebaseUser _firebaseUser;
   FirebaseAuth _auth = FirebaseAuth.instance;
-  StreamController _settingsController = StreamController.broadcast();
   Firestore _firestore = Firestore.instance;
-  Stream _settingsStream;
-
-  initUserData() {
-    _settingsController.add('waiting');
-
-    _firestore.collection('Users').document(widget.uid).get().then((value) {
-      _settingsController.add(value);
-    });
-    _auth.currentUser().then((value) => _firebaseUser = value);
-  }
-
-  @override
-  void initState() {
-    _settingsStream = _settingsController.stream;
-    initUserData();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +34,7 @@ class _SettingsState extends State<Settings> {
         appBar: AppBar(
           title: Text(
             'Settings',
-            style: TextStyle(fontSize: 25),
+            style: TextStyle(fontSize: 23),
           ),
           centerTitle: true,
           elevation: 0,
@@ -65,10 +46,11 @@ class _SettingsState extends State<Settings> {
               color: Colors.white,
               borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(30), topRight: Radius.circular(30))),
-          child: StreamBuilder(
-            stream: _settingsStream,
+          child: StreamBuilder<DocumentSnapshot>(
+            stream:
+                _firestore.collection('Users').document(widget.uid).snapshots(),
             builder: (context, snapshot) {
-              if (snapshot.data == 'waiting' || snapshot.data == null) {
+              if (!snapshot.hasData) {
                 return Center(child: CircularProgressIndicator());
               } else {
                 return SingleChildScrollView(
@@ -128,25 +110,32 @@ class _SettingsState extends State<Settings> {
                       height: 18,
                     ),
                     GestureDetector(
+                        onTap: () {
+                          showTile('first', 'first_name', snapshot.data);
+                        },
+                        child: getApproprateTile(
+                            snapshot.data.data['first_name'], 'First name')),
+                    GestureDetector(
+                        onTap: () {
+                          showTile('last', 'last_name', snapshot.data);
+                        },
+                        child: getApproprateTile(
+                            snapshot.data.data['last_name'], 'Last name')),
+                    GestureDetector(
                         onTap: () {},
                         child: getApproprateTile(
-                            snapshot.data.data['first_name'])),
+                            snapshot.data.data['dob'], 'Date of birth')),
                     GestureDetector(
                         onTap: () {},
-                        child:
-                            getApproprateTile(snapshot.data.data['last_name'])),
+                        child: getApproprateTile(
+                            snapshot.data.data['phone'], 'Phone')),
                     GestureDetector(
                         onTap: () {},
-                        child: getApproprateTile(snapshot.data.data['dob'])),
+                        child: getApproprateTile(
+                            snapshot.data.data['area'], 'Area')),
                     GestureDetector(
                         onTap: () {},
-                        child: getApproprateTile(snapshot.data.data['phone'])),
-                    GestureDetector(
-                        onTap: () {},
-                        child: getApproprateTile(snapshot.data.data['area'])),
-                    GestureDetector(
-                        onTap: () {},
-                        child: getApproprateTile(_firebaseUser.email)),
+                        child: getApproprateTile(_firebaseUser.email, 'Email')),
                     GestureDetector(
                         onTap: () async {
                           await _auth.sendPasswordResetEmail(
@@ -158,17 +147,17 @@ class _SettingsState extends State<Settings> {
                               topLeft: Radius.circular(18),
                               topRight: Radius.circular(18),
                             )),
-                            backgroundColor: Colors.deepOrangeAccent,
+                            backgroundColor: Colors.orange.shade300,
                             content: Text(
                               'A reset link has sent to your email',
                               style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 18,
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold),
                             ),
                           ));
                         },
-                        child: getApproprateTile('Change Password')),
+                        child: getApproprateTile('Change Password', '')),
                   ]),
                 );
               }
@@ -177,22 +166,78 @@ class _SettingsState extends State<Settings> {
         ));
   }
 
-  getApproprateTile(String title) {
-    return Container(
-      margin: EdgeInsets.all(9),
-      padding: EdgeInsets.all(5),
-      decoration: BoxDecoration(
-          color: Colors.grey.shade200, borderRadius: BorderRadius.circular(30)),
-      child: ListTile(
-          title: Text(
-            title,
+  showTile(String agenda, String deployType, DocumentSnapshot snap) {
+    String text = '';
+    showDialog(
+        context: context,
+        child: Scaffold(
+          backgroundColor: Colors.transparent,
+          body: CupertinoAlertDialog(
+            title: Text(
+              'Change $agenda name',
+              style: TextStyle(
+                  color: Colors.deepOrange,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18),
+            ),
+            content: Container(
+              decoration: BoxDecoration(),
+              child: TextFormField(
+                onChanged: (value) => text = value,
+                decoration: InputDecoration(
+                  hintText: "First name",
+                  hintStyle: TextStyle(color: Colors.grey, letterSpacing: 1.0),
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+            actions: <Widget>[
+              CupertinoDialogAction(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'Cancel',
+                  style: TextStyle(
+                      color: Colors.orange,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18),
+                ),
+              ),
+              CupertinoDialogAction(
+                onPressed: () {
+                  if (text.length < 3) {
+                    Fluttertoast.showToast(msg: 'Invalid Content');
+                  } else {
+                    snap.reference.setData({deployType: text}, merge: true);
+                    Navigator.pop(context);
+                    Fluttertoast.showToast(msg: 'Preferences Updated');
+                  }
+                },
+                child: Text(
+                  'Change',
+                  style: TextStyle(
+                      color: Colors.green.shade500,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18),
+                ),
+              )
+            ],
           ),
-          trailing: Icon(
-            Icons.edit,
-            color: Colors.deepOrange,
-            size: 18,
-          )),
-    );
+        ));
+  }
+
+  getApproprateTile(String title, String trailing) {
+    return Container(
+        margin: EdgeInsets.all(9),
+        padding: EdgeInsets.all(3),
+        decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(25)),
+        child: ListTile(
+            title: Text(title, style: TextStyle(color: Colors.grey.shade700)),
+            trailing:
+                Text(trailing, style: TextStyle(color: Colors.grey.shade500))));
   }
 
   changeProfilePicture() async {

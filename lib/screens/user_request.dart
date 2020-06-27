@@ -193,7 +193,7 @@ class _UserRequestState extends State<UserRequest> {
   }
 
   request() async {
-    if (des.length > 15 && link.length > 3) {
+    if (des.length > 3 && link.length > 3) {
       setState(() {
         loading = true;
       });

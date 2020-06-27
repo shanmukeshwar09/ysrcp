@@ -30,23 +30,25 @@ class _MainPageState extends State<MainPage>
   var initializationSettingsIOS;
   var initializationSettings;
 
-  Future<void> _showNotification(String title, String body) async {
+  Future _showNotification(String title, String body) async {
     var androidPlatformChannelSpecifics = AndroidNotificationDetails(
         'channel_ID', 'channel name', 'channel description',
-        importance: Importance.Max, priority: Priority.High, ticker: 'ticker');
+        importance: Importance.Max,
+        priority: Priority.High,
+        ticker: 'test ticker');
 
     var iOSChannelSpecifics = IOSNotificationDetails();
     var platformChannelSpecifics = NotificationDetails(
         androidPlatformChannelSpecifics, iOSChannelSpecifics);
 
-    await flutterLocalNotificationsPlugin
-        .show(0, title, body, platformChannelSpecifics, payload: 'null');
+    await flutterLocalNotificationsPlugin.show(
+        0, title, body, platformChannelSpecifics,
+        payload: 'test payload');
   }
 
   @override
   void initState() {
-    _tabController = new TabController(length: 2, vsync: this);
-
+    _tabController = new TabController(length: 3, vsync: this);
     super.initState();
 
     initializationSettingsAndroid =
@@ -54,14 +56,10 @@ class _MainPageState extends State<MainPage>
 
     _firebaseMessaging.configure(
         onMessage: (Map<String, dynamic> message) async {
-      _showNotification(message['data']['title'], message['data']['body']);
-
-      print("onMessage: $message");
-    }, onLaunch: (Map<String, dynamic> message) async {
-      print("onLaunch: $message");
-    }, onResume: (Map<String, dynamic> message) async {
-      print("onResume: $message");
-    });
+          _showNotification(message['data']['title'], message['data']['body']);
+        },
+        onLaunch: (Map<String, dynamic> message) async {},
+        onResume: (Map<String, dynamic> message) async {});
   }
 
   @override
@@ -82,6 +80,7 @@ class _MainPageState extends State<MainPage>
           tabs: [
             Tab(text: 'Pending'),
             Tab(text: 'OnGoing'),
+            Tab(text: 'Completed'),
           ],
           controller: _tabController,
         ),
@@ -142,6 +141,7 @@ class _MainPageState extends State<MainPage>
                     await SharedPreferences.getInstance();
                 await _pref.clear();
                 _firebaseMessaging.unsubscribeFromTopic(widget.uid);
+                _firebaseMessaging.unsubscribeFromTopic('admin');
                 Navigator.pushReplacement(context,
                     MaterialPageRoute(builder: (_) {
                   return SignIn();
@@ -166,6 +166,7 @@ class _MainPageState extends State<MainPage>
         children: [
           getPending(),
           getOnGoing(),
+          getFinal(),
         ],
         controller: _tabController,
       ),
@@ -282,9 +283,8 @@ class _MainPageState extends State<MainPage>
                                               .delete();
 
                                           Notifications().pushNotification(
-                                              'Request Approved',
-                                              snapshot.data.documents[index]
-                                                  ['agenda'],
+                                              'Request Accepted',
+                                              'Agenda : ${snapshot.data.documents[index]['agenda']}',
                                               'admin');
                                         },
                                         child: Text(
@@ -450,5 +450,88 @@ class _MainPageState extends State<MainPage>
         },
       ),
     );
+  }
+
+  getFinal() {
+    return Container(
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.only(
+                topRight: Radius.circular(30), topLeft: Radius.circular(30)),
+            color: Colors.white),
+        child: StreamBuilder<QuerySnapshot>(
+            stream: _firestore
+                .collection('Users')
+                .document(widget.uid)
+                .collection('completed')
+                .snapshots(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return Center(child: CircularProgressIndicator());
+              } else {
+                if (snapshot.data.documents.length == 0) {
+                  return Center(
+                    child: Text(
+                      'No meetings completed yet !',
+                      textAlign: TextAlign.center,
+                      style:
+                          TextStyle(color: Colors.grey.shade900, fontSize: 21),
+                    ),
+                  );
+                } else {
+                  return Container(
+                      child: ListView.builder(
+                          itemCount: snapshot.data.documents.length,
+                          itemBuilder: (_, index) {
+                            return Container(
+                                margin: EdgeInsets.all(9),
+                                padding: EdgeInsets.all(9),
+                                decoration: BoxDecoration(
+                                    color: Colors.grey.shade200,
+                                    borderRadius: BorderRadius.circular(18)),
+                                child: ListTile(
+                                    title: Container(
+                                      alignment: Alignment.center,
+                                      padding: EdgeInsets.all(5),
+                                      child: Text(
+                                          'Member : ${snapshot.data.documents[index]['Member']}'),
+                                    ),
+                                    subtitle: Column(children: <Widget>[
+                                      Column(children: <Widget>[
+                                        Container(
+                                          alignment: Alignment.center,
+                                          padding: EdgeInsets.all(5),
+                                          child: Text(
+                                              'Channel : ${snapshot.data.documents[index]['Channel']}'),
+                                        ),
+                                        Container(
+                                          alignment: Alignment.center,
+                                          padding: EdgeInsets.all(9),
+                                          child: Text(
+                                              'Date : ${snapshot.data.documents[index]['Date']}'),
+                                        ),
+                                        Container(
+                                          alignment: Alignment.center,
+                                          padding: EdgeInsets.all(9),
+                                          child: Text(
+                                              'Agenda : ${snapshot.data.documents[index]['Agenda']}'),
+                                        ),
+                                        Container(
+                                          alignment: Alignment.center,
+                                          padding: EdgeInsets.all(9),
+                                          child: Text(
+                                              'Description : ${snapshot.data.documents[index]['Description']}'),
+                                        ),
+                                        Container(
+                                          alignment: Alignment.center,
+                                          padding: EdgeInsets.all(9),
+                                          child: Text(
+                                              'Link : ${snapshot.data.documents[index]['Link']}'),
+                                        ),
+                                      ])
+                                    ])));
+                          }));
+                }
+              }
+            }));
   }
 }

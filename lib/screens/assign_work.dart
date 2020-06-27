@@ -169,7 +169,8 @@ class _AssignWorkState extends State<AssignWork> {
 
     widget.uids.forEach((element) async {
       final docId = DateTime.now().millisecondsSinceEpoch.toString();
-      await _firestore.collection('pending').document(docId).setData({
+      print(docId);
+      _firestore.collection('pending').document(docId).setData({
         'channel_name': selectedChannel,
         'date': _dateTime,
         'agenda': des,
@@ -190,7 +191,7 @@ class _AssignWorkState extends State<AssignWork> {
         });
       });
       Fluttertoast.showToast(msg: 'Done !');
-      Navigator.pop(context);
     });
+    Navigator.pop(context);
   }
 }

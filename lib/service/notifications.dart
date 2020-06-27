@@ -13,13 +13,10 @@ class Notifications {
       'https://fcm.googleapis.com/fcm/send',
       body: json.encode({
         'notification': {'body': '$body', 'title': '$title'},
-        'priority': 'high',
         'data': {
           'title': '$title',
           'body': '$body',
           'click_action': 'FLUTTER_NOTIFICATION_CLICK',
-          'id': '1',
-          'status': 'done',
         },
         'to': '/topics/$topic',
       }),
