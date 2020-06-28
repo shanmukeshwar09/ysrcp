@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:pin_entry_text_field/pin_entry_text_field.dart';
+import 'package:ysrcp/service/colors.dart';
 
 class ChangeAdminPassword extends StatefulWidget {
   @override
@@ -17,13 +18,15 @@ class _ChangeAdminPasswordState extends State<ChangeAdminPassword> {
   bool isChecking = false;
   bool isChanging = false;
   bool isAuthenticated = false;
+  ColorsMap _colorsMap = ColorsMap();
 
   Firestore _firestore = Firestore.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.green,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: AppBar(
+          backgroundColor: _colorsMap.getAppbarColor(),
           title: Text(
             'Change Password',
             style: TextStyle(fontSize: 23),

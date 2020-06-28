@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ysrcp/service/colors.dart';
 import 'package:ysrcp/service/notifications.dart';
 
 class SubmitForm extends StatefulWidget {
@@ -19,11 +20,13 @@ class _SubmitFormState extends State<SubmitForm> {
   final _controller = TextEditingController();
   final _linkController = TextEditingController();
   bool loading = false;
+  ColorsMap _colorsMap = ColorsMap();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green,
+      backgroundColor: _colorsMap.getBackgroundColor(),
       appBar: AppBar(
+        backgroundColor: _colorsMap.getAppbarColor(),
         title: Text(
           'Submit',
           style: TextStyle(fontSize: 25),
@@ -116,6 +119,7 @@ class _SubmitFormState extends State<SubmitForm> {
                                 'description': _controller.text,
                                 'date': widget.documentSnapshot['date'],
                                 'link': _linkController.text,
+                                'time': widget.documentSnapshot['time'],
                                 'uid': widget.uid
                               });
                             });

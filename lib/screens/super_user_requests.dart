@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ysrcp/screens/full_screen.dart';
 import 'package:ysrcp/screens/profile_screen.dart';
+import 'package:ysrcp/service/colors.dart';
 import 'package:ysrcp/service/notifications.dart';
 
 class SuperUserRequests extends StatefulWidget {
@@ -13,12 +14,14 @@ class SuperUserRequests extends StatefulWidget {
 
 class _SuperUserRequestsState extends State<SuperUserRequests> {
   Firestore _firestore = Firestore.instance;
+  ColorsMap _colorsMap = ColorsMap();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.green,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: AppBar(
+          backgroundColor: _colorsMap.getAppbarColor(),
           title: Text('Requests', style: TextStyle(fontSize: 23)),
           centerTitle: true,
           elevation: 0,
@@ -143,6 +146,13 @@ class _SuperUserRequestsState extends State<SuperUserRequests> {
                                                           const EdgeInsets.only(
                                                               top: 5),
                                                       child: Text(
+                                                          'Time : ${snapshot.data.documents[index]['time']}'),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              top: 5),
+                                                      child: Text(
                                                           'Agenda : ${snapshot.data.documents[index]['agenda']}'
                                                               .toString()),
                                                     ),
@@ -253,7 +263,12 @@ class _SuperUserRequestsState extends State<SuperUserRequests> {
                                                                         .data
                                                                         .documents[
                                                                             index]
-                                                                        .data['link']
+                                                                        .data['link'],
+                                                                    'Time': snapshot
+                                                                        .data
+                                                                        .documents[
+                                                                            index]
+                                                                        .data['time']
                                                                   });
                                                                   _firestore
                                                                       .collection(
@@ -294,7 +309,12 @@ class _SuperUserRequestsState extends State<SuperUserRequests> {
                                                                         .data
                                                                         .documents[
                                                                             index]
-                                                                        .data['link']
+                                                                        .data['link'],
+                                                                    'Time': snapshot
+                                                                        .data
+                                                                        .documents[
+                                                                            index]
+                                                                        .data['time']
                                                                   }).whenComplete(
                                                                           () {
                                                                     Notifications().pushNotification(

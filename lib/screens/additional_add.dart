@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ysrcp/screens/full_screen.dart';
 import 'package:ysrcp/screens/profile_screen.dart';
+import 'package:ysrcp/service/colors.dart';
 import 'package:ysrcp/service/notifications.dart';
 
 class AdditionalAdd extends StatefulWidget {
@@ -17,13 +18,15 @@ class AdditionalAdd extends StatefulWidget {
 class _AdditionalAddState extends State<AdditionalAdd> {
   Firestore _firestore = Firestore.instance;
   Set selection = {};
+  ColorsMap _colorsMap = ColorsMap();
   bool loading = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.green,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: selection.length > 0
             ? AppBar(
+                backgroundColor: _colorsMap.getAppbarColor(),
                 elevation: 0,
                 leading: IconButton(
                   icon: Icon(Icons.close),
@@ -163,7 +166,8 @@ class _AdditionalAddState extends State<AdditionalAdd> {
         'date': widget.snap.data['date'],
         'agenda': widget.snap.data['agenda'],
         'uid': element,
-        'status': 'pending'
+        'status': 'pending',
+        'time': widget.snap.data['time'],
       }).whenComplete(() {
         _firestore
             .collection('Users')
@@ -175,6 +179,7 @@ class _AdditionalAddState extends State<AdditionalAdd> {
           'channel_name': widget.snap.data['channel_name'],
           'date': widget.snap.data['date'],
           'agenda': widget.snap.data['agenda'],
+          'time': widget.snap.data['time'],
         });
       }).whenComplete(() {
         Notifications().pushNotification(

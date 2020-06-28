@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       home: uid == null ? SignIn() : MainPage(uid: uid),
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: ThemeData(primarySwatch: Colors.green),
     );
   }
 }

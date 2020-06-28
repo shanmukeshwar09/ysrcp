@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_entry_text_field/pin_entry_text_field.dart';
 import 'package:ysrcp/screens/super_user.dart';
+import 'package:ysrcp/service/colors.dart';
 
 class Authenticate extends StatefulWidget {
   @override
@@ -12,12 +13,14 @@ class _AuthenticateState extends State<Authenticate> {
   String pin = '';
   String error = '';
   bool isChecking = false;
+  ColorsMap _colorsMap = ColorsMap();
   Firestore _firestore = Firestore.instance;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.green,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: AppBar(
+          backgroundColor: _colorsMap.getAppbarColor(),
           title: Text(
             'Authenticate',
             style: TextStyle(fontSize: 23),

@@ -7,6 +7,7 @@ import 'package:ysrcp/screens/super_user_completed.dart';
 import 'package:ysrcp/screens/super_user_ongoing.dart';
 import 'package:ysrcp/screens/super_user_pending.dart';
 import 'package:ysrcp/screens/super_user_requests.dart';
+import 'package:ysrcp/service/colors.dart';
 
 class Superuser extends StatefulWidget {
   @override
@@ -18,6 +19,8 @@ class _SuperuserState extends State<Superuser> {
   var pendingCount = 0;
   var onGoingCount = 0;
   var requestsCount = 0;
+  ColorsMap _colorsMap = ColorsMap();
+
   subscribeToTopic() {
     FirebaseMessaging _msg = FirebaseMessaging();
     _msg.subscribeToTopic('admin');
@@ -52,11 +55,12 @@ class _SuperuserState extends State<Superuser> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.green,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: AppBar(
+          backgroundColor: _colorsMap.getAppbarColor(),
           title: Text(
             'SuperUser',
-            style: TextStyle(fontSize: 25),
+            style: TextStyle(fontSize: 23),
           ),
           centerTitle: true,
           elevation: 0,

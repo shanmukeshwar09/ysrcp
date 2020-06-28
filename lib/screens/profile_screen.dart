@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:ysrcp/screens/full_screen.dart';
+import 'package:ysrcp/service/colors.dart';
 
 class ProfileScreen extends StatefulWidget {
   final DocumentSnapshot snapshot;
@@ -12,11 +13,13 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  ColorsMap _colorsMap = ColorsMap();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: AppBar(
+          backgroundColor: _colorsMap.getAppbarColor(),
           title: Text(
             'Profile Screen',
             style: TextStyle(fontSize: 25),
@@ -87,8 +90,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             color: Colors.grey.shade200,
             borderRadius: BorderRadius.circular(25)),
         child: ListTile(
-          title: Text(title, style: TextStyle(color: Colors.grey.shade700)),
-          trailing: Text(trailing , style: TextStyle(color: Colors.grey.shade500))
-        ));
+            title: Text(title, style: TextStyle(color: Colors.grey.shade700)),
+            trailing:
+                Text(trailing, style: TextStyle(color: Colors.grey.shade500))));
   }
 }

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:ysrcp/screens/full_screen.dart';
+import 'package:ysrcp/service/colors.dart';
 
 class Settings extends StatefulWidget {
   final String uid;
@@ -26,6 +27,7 @@ class _SettingsState extends State<Settings> {
   FirebaseUser _firebaseUser;
   FirebaseAuth _auth = FirebaseAuth.instance;
   Firestore _firestore = Firestore.instance;
+  ColorsMap _colorsMap = ColorsMap();
 
   @override
   void initState() {
@@ -38,11 +40,14 @@ class _SettingsState extends State<Settings> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.blue,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: AppBar(
+          backgroundColor: _colorsMap.getAppbarColor(),
           title: Text(
             'Settings',
-            style: TextStyle(fontSize: 23),
+            style: TextStyle(
+              fontSize: 23,
+            ),
           ),
           centerTitle: true,
           elevation: 0,

@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ysrcp/screens/additional_add.dart';
 import 'package:ysrcp/screens/full_screen.dart';
 import 'package:ysrcp/screens/profile_screen.dart';
+import 'package:ysrcp/service/colors.dart';
 
 class SuperUserPending extends StatefulWidget {
   @override
@@ -13,11 +14,14 @@ class SuperUserPending extends StatefulWidget {
 
 class _SuperUserPendingState extends State<SuperUserPending> {
   Firestore _firestore = Firestore.instance;
+  ColorsMap _colorsMap = ColorsMap();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.green,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: AppBar(
+          backgroundColor: _colorsMap.getAppbarColor(),
           title: Text('Pending', style: TextStyle(fontSize: 23)),
           centerTitle: true,
           elevation: 0,
@@ -138,14 +142,21 @@ class _SuperUserPendingState extends State<SuperUserPending> {
                                                 Padding(
                                                   padding:
                                                       const EdgeInsets.only(
-                                                          top: 9),
+                                                          top: 5),
+                                                  child: Text(
+                                                      'Time : ${snapshot.data.documents[index]['time']}'),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 5),
                                                   child: Text(
                                                       'Agenda : ${snapshot.data.documents[index]['agenda']}'),
                                                 ),
                                                 Padding(
                                                   padding:
                                                       const EdgeInsets.only(
-                                                          top: 9, bottom: 9),
+                                                          top: 5),
                                                   child: Text(
                                                       'Status : ${snapshot.data.documents[index]['status']}'
                                                           .toString()),

@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ysrcp/screens/additional_add.dart';
 import 'package:ysrcp/screens/full_screen.dart';
 import 'package:ysrcp/screens/profile_screen.dart';
+import 'package:ysrcp/service/colors.dart';
 import 'package:ysrcp/service/notifications.dart';
 
 class SuperUserOnGoing extends StatefulWidget {
@@ -14,11 +15,14 @@ class SuperUserOnGoing extends StatefulWidget {
 
 class _SuperUserOnGoingState extends State<SuperUserOnGoing> {
   Firestore _firestore = Firestore.instance;
+  ColorsMap _colorsMap = ColorsMap();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.green,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: AppBar(
+          backgroundColor: _colorsMap.getAppbarColor(),
           title: Text('Ongoing', style: TextStyle(fontSize: 25)),
           centerTitle: true,
           elevation: 0,
@@ -132,6 +136,13 @@ class _SuperUserOnGoingState extends State<SuperUserOnGoing> {
                                                           top: 5),
                                                   child: Text(
                                                       'Date : ${snapshot.data.documents[index]['date']}'),
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                          top: 5),
+                                                  child: Text(
+                                                      'Time : ${snapshot.data.documents[index]['time']}'),
                                                 ),
                                                 Padding(
                                                   padding:

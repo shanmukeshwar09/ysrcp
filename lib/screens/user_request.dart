@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:ysrcp/service/colors.dart';
 import 'package:ysrcp/service/notifications.dart';
 
 class UserRequest extends StatefulWidget {
@@ -18,12 +19,15 @@ class _UserRequestState extends State<UserRequest> {
   String link = '';
   String des = '';
   bool loading = false;
+  ColorsMap _colorsMap = ColorsMap();
+  String time;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.green,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: AppBar(
+          backgroundColor: _colorsMap.getAppbarColor(),
           title: Text(
             'Assign Meeting',
             style: TextStyle(fontSize: 25),
@@ -136,6 +140,38 @@ class _UserRequestState extends State<UserRequest> {
                       ),
                     ),
                     Container(
+                        margin: EdgeInsets.only(top: 10),
+                        padding: EdgeInsets.all(10),
+                        child: TextFormField(
+                            readOnly: true,
+                            enabled: true,
+                            onTap: () async {
+                              final result = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay.now());
+                              if (result != null) {
+                                setState(() {
+                                  time = result.format(context);
+                                });
+                              }
+                            },
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Colors.grey.shade100,
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey.shade200)),
+                              disabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide:
+                                      BorderSide(color: Colors.grey.shade200)),
+                              hintText: time == null ? 'time' : time,
+                              hintStyle: TextStyle(
+                                  color: Colors.grey, letterSpacing: 1.0),
+                              border: InputBorder.none,
+                            ))),
+                    Container(
                       margin: EdgeInsets.only(top: 10),
                       padding: EdgeInsets.all(10),
                       child: TextFormField(
@@ -161,7 +197,7 @@ class _UserRequestState extends State<UserRequest> {
                       ),
                     ),
                     Container(
-                      height: 300,
+                      height: 180,
                       margin: EdgeInsets.only(top: 10),
                       padding: EdgeInsets.all(10),
                       child: TextFormField(
@@ -221,7 +257,8 @@ class _UserRequestState extends State<UserRequest> {
         'description': des,
         'date': _dateTime,
         'uid': widget.uid,
-        'agenda': 'null'
+        'agenda': 'null',
+        'time': time,
       }).whenComplete(() {
         Notifications().pushNotification('New Request', des, 'admin');
         Fluttertoast.showToast(msg: 'Done !');

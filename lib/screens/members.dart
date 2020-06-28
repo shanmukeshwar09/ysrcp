@@ -5,6 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:ysrcp/screens/assign_work.dart';
 import 'package:ysrcp/screens/full_screen.dart';
 import 'package:ysrcp/screens/profile_screen.dart';
+import 'package:ysrcp/service/colors.dart';
 
 class Members extends StatefulWidget {
   @override
@@ -14,13 +15,15 @@ class Members extends StatefulWidget {
 class _MembersState extends State<Members> {
   Firestore _firestore = Firestore.instance;
   Set selection = {};
+  ColorsMap _colorsMap = ColorsMap();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        backgroundColor: Colors.green,
+        backgroundColor: _colorsMap.getBackgroundColor(),
         appBar: selection.length > 0
             ? AppBar(
+                backgroundColor: _colorsMap.getAppbarColor(),
                 elevation: 0,
                 leading: IconButton(
                   icon: Icon(Icons.close),
@@ -50,7 +53,7 @@ class _MembersState extends State<Members> {
                                         context,
                                         MaterialPageRoute(
                                             builder: (_) =>
-                                                AssignWork(uids : selection)))
+                                                AssignWork(uids: selection)))
                                     .whenComplete(() {
                                   setState(() {
                                     selection.clear();
@@ -59,6 +62,7 @@ class _MembersState extends State<Members> {
                     SizedBox(width: 18),
                   ])
             : AppBar(
+                backgroundColor: _colorsMap.getAppbarColor(),
                 title: Text('Members', style: TextStyle(fontSize: 25)),
                 centerTitle: true,
                 elevation: 0,

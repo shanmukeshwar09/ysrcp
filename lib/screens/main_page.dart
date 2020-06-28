@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -12,7 +10,10 @@ import 'package:ysrcp/screens/settings.dart';
 import 'package:ysrcp/screens/signin.dart';
 import 'package:ysrcp/screens/submit_form.dart';
 import 'package:ysrcp/screens/user_request.dart';
+import 'package:ysrcp/service/colors.dart';
 import 'package:ysrcp/service/notifications.dart';
+
+import 'full_screen.dart';
 
 class MainPage extends StatefulWidget {
   final uid;
@@ -27,6 +28,7 @@ class _MainPageState extends State<MainPage>
   Firestore _firestore = Firestore.instance;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   TabController _tabController;
+  ColorsMap _colorsMap = ColorsMap();
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       new FlutterLocalNotificationsPlugin();
   var initializationSettingsAndroid;
@@ -47,7 +49,7 @@ class _MainPageState extends State<MainPage>
         androidPlatformChannelSpecifics, iOSChannelSpecifics);
 
     await flutterLocalNotificationsPlugin.show(
-      Random().nextInt(1000),
+      0,
       title,
       body,
       platformChannelSpecifics,
@@ -61,7 +63,7 @@ class _MainPageState extends State<MainPage>
     super.initState();
 
     initializationSettingsAndroid =
-        new AndroidInitializationSettings('app_icon');
+        new AndroidInitializationSettings('ic_launcher');
     initializationSettingsIOS = new IOSInitializationSettings();
     initializationSettings = new InitializationSettings(
         initializationSettingsAndroid, initializationSettingsIOS);
@@ -71,7 +73,6 @@ class _MainPageState extends State<MainPage>
 
     _firebaseMessaging.configure(
         onMessage: (Map<String, dynamic> message) async {
-          print(message);
           _showNotification(message['data']['title'], message['data']['body']);
         },
         onLaunch: (Map<String, dynamic> message) async {},
@@ -81,8 +82,9 @@ class _MainPageState extends State<MainPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green,
+      backgroundColor: _colorsMap.getBackgroundColor(),
       appBar: AppBar(
+        backgroundColor: _colorsMap.getAppbarColor(),
         title: Text(
           'YSRCP',
           style: TextStyle(fontSize: 25),
@@ -102,6 +104,7 @@ class _MainPageState extends State<MainPage>
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: _colorsMap.getAppbarColor(),
         child: Icon(Icons.add),
         onPressed: () {
           Navigator.push(context, MaterialPageRoute(builder: (_) {
@@ -111,168 +114,159 @@ class _MainPageState extends State<MainPage>
           }));
         },
       ),
-      drawer: Drawer(
-        elevation: 30,
-        child: StreamBuilder<DocumentSnapshot>(
-            stream: Firestore.instance
-                .collection('Users')
-                .document(widget.uid)
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return ListView(
-                  children: <Widget>[
-                    Container(
-                      height: 250,
-                    //  width: 250,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                        fit: BoxFit.fill,
-                        image: (snapshot.data['imageUrl'] == 'null')
-                            ? AssetImage('assets/circular_avatar.png')
-                            : CachedNetworkImageProvider(
-                                snapshot.data['imageUrl']),
-                      )),
-                    ),
-                    SizedBox(height: 30),
-                    Container(
-                      alignment: Alignment.center,
-                      margin: EdgeInsets.only(top: 9),
-                      padding: EdgeInsets.all(9),
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(30)),
-                      child: ListTile(
-                        onTap: () {
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (_) {
-                            return Settings(uid: widget.uid);
-                          }));
-                        },
-                        title: Text(
+      drawer: Container(
+        width: 250,
+        child: Drawer(
+          elevation: 30,
+          child: StreamBuilder<DocumentSnapshot>(
+              stream: Firestore.instance
+                  .collection('Users')
+                  .document(widget.uid)
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return ListView(
+                    children: <Widget>[
+                      Container(
+                        margin: EdgeInsets.all(9),
+                        alignment: Alignment.topLeft,
+                        child: Center(
+                          child: GestureDetector(
+                            onTap: () async {
+                              if (snapshot.data['imageUrl'] != 'null') {
+                                Navigator.push(context,
+                                    MaterialPageRoute(builder: (_) {
+                                  return FullScreenImageView(
+                                    url: snapshot.data['imageUrl'],
+                                  );
+                                }));
+                              }
+                            },
+                            child: CircleAvatar(
+                              backgroundImage:
+                                  (snapshot.data['imageUrl'] == 'null')
+                                      ? AssetImage('assets/circular_avatar.png')
+                                      : CachedNetworkImageProvider(
+                                          snapshot.data['imageUrl']),
+                              maxRadius: 50,
+                              minRadius: 50,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.all(5),
+                        child: Text(
                           snapshot.data.data['first_name'] +
                               ' ' +
                               snapshot.data.data['last_name'],
-                          style: TextStyle(color: Colors.grey.shade700),
-                        ),
-                        trailing: Text(
-                          'name',
-                          style: TextStyle(color: Colors.grey.shade500),
+                          style: TextStyle(
+                              color: Colors.grey.shade700, fontSize: 18),
                         ),
                       ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 9),
-                      padding: EdgeInsets.all(9),
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(30)),
-                      child: ListTile(
+                      Container(
+                        margin: EdgeInsets.all(9),
+                        decoration: BoxDecoration(
+                            color: _colorsMap.getDrawrTileColor(),
+                            borderRadius: BorderRadius.circular(30)),
+                        child: ListTile(
+                          title: Text(
+                            snapshot.data.data['bio'],
+                            style: TextStyle(color: Colors.grey.shade700),
+                          ),
+                          trailing: Text(
+                            'bio',
+                            style: TextStyle(color: Colors.grey.shade500),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.all(9),
+                        decoration: BoxDecoration(
+                            color: _colorsMap.getDrawrTileColor(),
+                            borderRadius: BorderRadius.circular(30)),
+                        child: ListTile(
+                          title: Text(
+                            snapshot.data.data['area'],
+                            style: TextStyle(color: Colors.grey.shade700),
+                          ),
+                          trailing: Text(
+                            'Area',
+                            style: TextStyle(color: Colors.grey.shade500),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 30),
+                      ListTile(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => Authenticate()));
+                        },
+                        title: Container(
+                            alignment: Alignment.center,
+                            margin: EdgeInsets.only(top: 9),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(30)),
+                            child: Text(
+                              'Super User',
+                              style: TextStyle(color: Colors.grey.shade500),
+                            )),
+                      ),
+                      ListTile(
                         onTap: () {
                           Navigator.push(context,
                               MaterialPageRoute(builder: (_) {
                             return Settings(uid: widget.uid);
                           }));
                         },
-                        title: Text(
-                          snapshot.data.data['bio'],
-                          style: TextStyle(color: Colors.grey.shade700),
-                        ),
-                        trailing: Text(
-                          'bio',
-                          style: TextStyle(color: Colors.grey.shade500),
-                        ),
+                        title: Container(
+                            alignment: Alignment.center,
+                            margin: EdgeInsets.only(top: 9),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(30)),
+                            child: Text(
+                              'Settings',
+                              style: TextStyle(color: Colors.grey.shade500),
+                            )),
                       ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 9),
-                      padding: EdgeInsets.all(9),
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(30)),
-                      child: ListTile(
-                        onTap: () {
-                          Navigator.push(context,
+                      ListTile(
+                        onTap: () async {
+                          final SharedPreferences _pref =
+                              await SharedPreferences.getInstance();
+                          await _pref.clear();
+                          _firebaseMessaging.unsubscribeFromTopic(widget.uid);
+                          _firebaseMessaging.unsubscribeFromTopic('admin');
+                          Navigator.pushReplacement(context,
                               MaterialPageRoute(builder: (_) {
-                            return Settings(uid: widget.uid);
+                            return SignIn();
                           }));
                         },
-                        title: Text(
-                          snapshot.data.data['area'],
-                          style: TextStyle(color: Colors.grey.shade700),
-                        ),
-                        trailing: Text(
-                          'Area',
-                          style: TextStyle(color: Colors.grey.shade500),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 30),
-                    ListTile(
-                      onTap: () {
-                        Navigator.push(context,
-                            MaterialPageRoute(builder: (_) => Authenticate()));
-                      },
-                      title: Container(
-                          alignment: Alignment.center,
-                          margin: EdgeInsets.only(top: 9),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(30)),
-                          child: Text(
-                            'Super User',
-                            style: TextStyle(color: Colors.grey.shade500),
-                          )),
-                    ),
-                    ListTile(
-                      onTap: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (_) {
-                          return Settings(uid: widget.uid);
-                        }));
-                      },
-                      title: Container(
-                          alignment: Alignment.center,
-                          margin: EdgeInsets.only(top: 9),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(30)),
-                          child: Text(
-                            'Settings',
-                            style: TextStyle(color: Colors.grey.shade500),
-                          )),
-                    ),
-                    ListTile(
-                      onTap: () async {
-                        final SharedPreferences _pref =
-                            await SharedPreferences.getInstance();
-                        await _pref.clear();
-                        _firebaseMessaging.unsubscribeFromTopic(widget.uid);
-                        _firebaseMessaging.unsubscribeFromTopic('admin');
-                        Navigator.pushReplacement(context,
-                            MaterialPageRoute(builder: (_) {
-                          return SignIn();
-                        }));
-                      },
-                      title: Container(
-                          alignment: Alignment.center,
-                          margin: EdgeInsets.only(top: 9),
-                          padding: EdgeInsets.all(18),
-                          decoration: BoxDecoration(
-                              color: Colors.grey.shade100,
-                              borderRadius: BorderRadius.circular(30)),
-                          child: Text(
-                            'Logout',
-                            style: TextStyle(color: Colors.red.shade500),
-                          )),
-                    )
-                  ],
-                );
-              } else {
-                return Center(child: CircularProgressIndicator());
-              }
-            }),
+                        title: Container(
+                            alignment: Alignment.center,
+                            margin: EdgeInsets.only(top: 9),
+                            padding: EdgeInsets.all(18),
+                            decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(30)),
+                            child: Text(
+                              'Logout',
+                              style: TextStyle(color: Colors.red.shade500),
+                            )),
+                      )
+                    ],
+                  );
+                } else {
+                  return Center(child: CircularProgressIndicator());
+                }
+              }),
+        ),
       ),
       body: TabBarView(
         children: [
@@ -338,6 +332,15 @@ class _MainPageState extends State<MainPage>
                                 ),
                                 Container(
                                   alignment: Alignment.center,
+                                  padding: const EdgeInsets.only(top: 9),
+                                  child: Text(
+                                      'Time : ${snapshot.data.documents[index]['time']}',
+                                      style: TextStyle(
+                                          color: Colors.grey.shade500,
+                                          fontSize: 14)),
+                                ),
+                                Container(
+                                  alignment: Alignment.center,
                                   padding:
                                       const EdgeInsets.only(top: 9, bottom: 9),
                                   child: Text(
@@ -382,6 +385,8 @@ class _MainPageState extends State<MainPage>
                                                 .data
                                                 .documents[index]
                                                 .data['agenda'],
+                                            'time': snapshot.data
+                                                .documents[index].data['time'],
                                             'uid': widget.uid
                                           });
                                           _firestore
@@ -510,6 +515,15 @@ class _MainPageState extends State<MainPage>
                               ),
                               Container(
                                 alignment: Alignment.center,
+                                padding: const EdgeInsets.only(top: 9),
+                                child: Text(
+                                    'Time : ${snapshot.data.documents[index]['time']}',
+                                    style: TextStyle(
+                                        color: Colors.grey.shade500,
+                                        fontSize: 14)),
+                              ),
+                              Container(
+                                alignment: Alignment.center,
                                 padding:
                                     const EdgeInsets.only(top: 9, bottom: 9),
                                 child: Text(
@@ -566,84 +580,85 @@ class _MainPageState extends State<MainPage>
 
   getFinal() {
     return Container(
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(
-                topRight: Radius.circular(30), topLeft: Radius.circular(30)),
-            color: Colors.white),
-        child: StreamBuilder<QuerySnapshot>(
-            stream: _firestore
-                .collection('Users')
-                .document(widget.uid)
-                .collection('completed')
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return Center(child: CircularProgressIndicator());
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.only(
+              topRight: Radius.circular(30), topLeft: Radius.circular(30)),
+          color: Colors.white),
+      child: StreamBuilder<QuerySnapshot>(
+          stream: _firestore
+              .collection('Users')
+              .document(widget.uid)
+              .collection('completed')
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(child: CircularProgressIndicator());
+            } else {
+              if (snapshot.data.documents.length == 0) {
+                return Center(
+                  child: Text(
+                    'No meetings completed yet !',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey.shade900, fontSize: 21),
+                  ),
+                );
               } else {
-                if (snapshot.data.documents.length == 0) {
-                  return Center(
-                    child: Text(
-                      'No meetings completed yet !',
-                      textAlign: TextAlign.center,
-                      style:
-                          TextStyle(color: Colors.grey.shade900, fontSize: 21),
-                    ),
-                  );
-                } else {
-                  return Container(
-                      child: ListView.builder(
-                          itemCount: snapshot.data.documents.length,
-                          itemBuilder: (_, index) {
-                            return Container(
-                                margin: EdgeInsets.all(9),
-                                padding: EdgeInsets.all(9),
-                                decoration: BoxDecoration(
-                                    color: Colors.grey.shade200,
-                                    borderRadius: BorderRadius.circular(18)),
-                                child: ListTile(
-                                    title: Container(
+                return Container(
+                  child: ListView.builder(
+                      itemCount: snapshot.data.documents.length,
+                      itemBuilder: (_, index) {
+                        return Container(
+                            margin: EdgeInsets.all(9),
+                            padding: EdgeInsets.all(9),
+                            decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(18)),
+                            child: ListTile(
+                                title: Container(
+                                  alignment: Alignment.center,
+                                  padding: EdgeInsets.all(5),
+                                  child: Text(
+                                      'Member : ${snapshot.data.documents[index]['Member']}'),
+                                ),
+                                subtitle: Column(children: <Widget>[
+                                  Column(children: <Widget>[
+                                    Container(
                                       alignment: Alignment.center,
                                       padding: EdgeInsets.all(5),
                                       child: Text(
-                                          'Member : ${snapshot.data.documents[index]['Member']}'),
+                                          'Channel : ${snapshot.data.documents[index]['Channel']}'),
                                     ),
-                                    subtitle: Column(children: <Widget>[
-                                      Column(children: <Widget>[
-                                        Container(
-                                          alignment: Alignment.center,
-                                          padding: EdgeInsets.all(5),
-                                          child: Text(
-                                              'Channel : ${snapshot.data.documents[index]['Channel']}'),
-                                        ),
-                                        Container(
-                                          alignment: Alignment.center,
-                                          padding: EdgeInsets.all(9),
-                                          child: Text(
-                                              'Date : ${snapshot.data.documents[index]['Date']}'),
-                                        ),
-                                        Container(
-                                          alignment: Alignment.center,
-                                          padding: EdgeInsets.all(9),
-                                          child: Text(
-                                              'Agenda : ${snapshot.data.documents[index]['Agenda']}'),
-                                        ),
-                                        Container(
-                                          alignment: Alignment.center,
-                                          padding: EdgeInsets.all(9),
-                                          child: Text(
-                                              'Description : ${snapshot.data.documents[index]['Description']}'),
-                                        ),
-                                        Container(
-                                          alignment: Alignment.center,
-                                          padding: EdgeInsets.all(9),
-                                          child: Text(
-                                              'Link : ${snapshot.data.documents[index]['Link']}'),
-                                        ),
-                                      ])
-                                    ])));
-                          }));
-                }
+                                    Container(
+                                      alignment: Alignment.center,
+                                      padding: EdgeInsets.all(9),
+                                      child: Text(
+                                          'Date : ${snapshot.data.documents[index]['Date']}'),
+                                    ),
+                                    Container(
+                                      alignment: Alignment.center,
+                                      padding: EdgeInsets.all(9),
+                                      child: Text(
+                                          'Agenda : ${snapshot.data.documents[index]['Agenda']}'),
+                                    ),
+                                    Container(
+                                      alignment: Alignment.center,
+                                      padding: EdgeInsets.all(9),
+                                      child: Text(
+                                          'Description : ${snapshot.data.documents[index]['Description']}'),
+                                    ),
+                                    Container(
+                                      alignment: Alignment.center,
+                                      padding: EdgeInsets.all(9),
+                                      child: Text(
+                                          'Link : ${snapshot.data.documents[index]['Link']}'),
+                                    ),
+                                  ])
+                                ])));
+                      }),
+                );
               }
-            }));
+            }
+          }),
+    );
   }
 }

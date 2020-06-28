@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ysrcp/screens/main_page.dart';
+import 'package:ysrcp/service/colors.dart';
 import 'package:ysrcp/service/notifications.dart';
 
 class SignUp extends StatefulWidget {
@@ -24,6 +25,7 @@ class _SignUpState extends State<SignUp> {
   bool loading = false;
   String selectedArea = 'Hyderabad';
   FirebaseMessaging _messaging = FirebaseMessaging();
+  ColorsMap _colorsMap = ColorsMap();
 
   String _dateTime;
 
@@ -39,8 +41,9 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.blue,
+      backgroundColor: _colorsMap.getBackgroundColor(),
       appBar: AppBar(
+        backgroundColor: _colorsMap.getAppbarColor(),
         title: Text(
           'Register',
           style: TextStyle(
@@ -49,304 +52,328 @@ class _SignUpState extends State<SignUp> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: Container(
-        height: double.infinity,
-        width: double.infinity,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(30), topRight: Radius.circular(30)),
-            color: Colors.white),
-        child: loading
-            ? Center(
-                child: CircularProgressIndicator(),
-              )
-            : ListView(
-                children: <Widget>[
-                  Container(
-                    margin: EdgeInsets.symmetric(vertical: 9, horizontal: 27),
-                    decoration: BoxDecoration(
-                        color: Colors.white70,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Color.fromRGBO(225, 95, 27, .3),
-                              blurRadius: 20,
-                              offset: Offset(0, 10))
-                        ]),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: <Widget>[
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey[300]))),
-                            child: TextFormField(
-                              onChanged: (value) => firstName = value,
-                              validator: (value) {
-                                return value.length > 1 ? null : 'invalid name';
-                              },
-                              decoration: InputDecoration(
-                                hintText: "First name",
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, letterSpacing: 1.0),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey[300]))),
-                            child: TextFormField(
-                              onChanged: (value) => lastName = value,
-                              validator: (value) {
-                                return value.length > 1 ? null : 'invalid name';
-                              },
-                              decoration: InputDecoration(
-                                hintText: "Last name",
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, letterSpacing: 1.0),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey[300]))),
-                            child: TextFormField(
-                              readOnly: true,
-                              enabled: true,
-                              onTap: () async {
-                                final result = await showDatePicker(
-                                    context: context,
-                                    initialDate:
-                                        DateTime(DateTime.now().year - 20),
-                                    firstDate:
-                                        DateTime(DateTime.now().year - 50),
-                                    lastDate:
-                                        DateTime(DateTime.now().year - 15));
-
-                                if (result != null) {
-                                  setState(() {
-                                    _dateTime = result.toString().split(' ')[0];
-                                    print(_dateTime);
-                                  });
-                                }
-                              },
-                              decoration: InputDecoration(
-                                suffix: Text('DateOfBirth'),
-                                hintText: _dateTime,
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, letterSpacing: 1.0),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey[300]))),
-                            child: TextFormField(
-                              onChanged: (value) => phone = value,
-                              keyboardType: TextInputType.number,
-                              validator: (value) {
-                                return (value.length != 10)
-                                    ? 'Invalid Phone number'
-                                    : null;
-                              },
-                              decoration: InputDecoration(
-                                hintText: "Phone",
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, letterSpacing: 1.0),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey[300]))),
-                            child: TextFormField(
-                              onChanged: (value) => email = value,
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (value) {
-                                return (value.isEmpty ||
-                                        !value.contains('@') ||
-                                        !value.contains('.'))
-                                    ? 'Invalid Email'
-                                    : null;
-                              },
-                              decoration: InputDecoration(
-                                hintText: "Email",
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, letterSpacing: 1.0),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey[300]))),
-                            child: TextFormField(
-                              onChanged: (value) => bio = value,
-                              keyboardType: TextInputType.emailAddress,
-                              validator: (value) {
-                                return (value.length < 5)
-                                    ? 'Invalid Bio'
-                                    : null;
-                              },
-                              decoration: InputDecoration(
-                                hintText: "Bio",
-                                hintStyle: TextStyle(
-                                    color: Colors.grey, letterSpacing: 1.0),
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          DropdownButtonFormField<String>(
-                              decoration: InputDecoration(
+      body: Center(
+        child: Container(
+          height: double.infinity,
+          width: 345,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+              color: Colors.white),
+          child: loading
+              ? Center(
+                  child: CircularProgressIndicator(),
+                )
+              : ListView(
+                  children: <Widget>[
+                    Container(
+                      margin: EdgeInsets.symmetric(vertical: 9, horizontal: 27),
+                      decoration: BoxDecoration(
+                          color: Colors.white70,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: [
+                            BoxShadow(
+                                color: Color.fromRGBO(10, 10, 180, .3),
+                                blurRadius: 20,
+                                offset: Offset(0, 10))
+                          ]),
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          children: <Widget>[
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom:
+                                          BorderSide(color: Colors.grey[300]))),
+                              child: TextFormField(
+                                onChanged: (value) => firstName = value,
+                                validator: (value) {
+                                  return value.length > 1
+                                      ? null
+                                      : 'invalid name';
+                                },
+                                decoration: InputDecoration(
+                                  hintText: "First Name",
+                                  hintStyle: TextStyle(
+                                      color: Colors.grey, letterSpacing: 1.0),
                                   border: InputBorder.none,
-                                  contentPadding: EdgeInsets.only(
-                                      top: 16, bottom: 16, left: 9)),
-                              isExpanded: true,
-                              iconEnabledColor: Colors.grey,
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 18),
-                              iconSize: 30,
-                              elevation: 9,
-                              value: selectedArea,
-                              onChanged: (newValue) {
-                                setState(() {
-                                  selectedArea = newValue;
-                                });
-                              },
-                              items: <String>[
-                                'Hyderabad',
-                                'Test83',
-                                'Test82',
-                                'Test45',
-                                'Test91',
-                                'Test24',
-                                'Test09'
-                              ].map<DropdownMenuItem<String>>((e) {
-                                return DropdownMenuItem<String>(
-                                    value: e,
-                                    child: Text(
-                                      e.toString(),
-                                    ));
-                              }).toList()),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom: BorderSide(color: Colors.grey[300]),
-                                    top: BorderSide(color: Colors.grey[300]))),
-                            child: TextFormField(
-                              onChanged: (value) => password = value,
-                              validator: (value) {
-                                return (value.isEmpty || value.length < 6)
-                                    ? 'Invalid Password'
-                                    : null;
-                              },
-                              style: TextStyle(letterSpacing: 1.5),
-                              obscureText: hidePassword,
-                              decoration: InputDecoration(
-                                  hintText: "Password",
-                                  suffixIcon: IconButton(
-                                    icon: Icon(Icons.remove_red_eye,
-                                        color: Colors.blue),
-                                    onPressed: () {
-                                      setState(() {
-                                        hidePassword = !hidePassword;
-                                      });
-                                    },
-                                  ),
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom:
+                                          BorderSide(color: Colors.grey[300]))),
+                              child: TextFormField(
+                                onChanged: (value) => lastName = value,
+                                validator: (value) {
+                                  return value.length > 1
+                                      ? null
+                                      : 'invalid name';
+                                },
+                                decoration: InputDecoration(
+                                  hintText: "Last Name",
                                   hintStyle: TextStyle(
                                       color: Colors.grey, letterSpacing: 1.0),
-                                  border: InputBorder.none),
+                                  border: InputBorder.none,
+                                ),
+                              ),
                             ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                                border: Border(
-                                    bottom:
-                                        BorderSide(color: Colors.grey[200]))),
-                            child: TextFormField(
-                              onChanged: (value) => passwordClone = value,
-                              validator: (value) {
-                                return ((value.isEmpty ||
-                                        value.length < 6 ||
-                                        value != password))
-                                    ? 'Invalid Password'
-                                    : null;
-                              },
-                              style: TextStyle(letterSpacing: 1.5),
-                              obscureText: hidePassword,
-                              decoration: InputDecoration(
-                                  hintText: "Re-Enter Password",
-                                  suffixIcon: IconButton(
-                                    icon: Icon(Icons.remove_red_eye,
-                                        color: Colors.blue),
-                                    onPressed: () {
-                                      setState(() {
-                                        hidePassword = !hidePassword;
-                                      });
-                                    },
-                                  ),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom:
+                                          BorderSide(color: Colors.grey[300]))),
+                              child: TextFormField(
+                                readOnly: true,
+                                enabled: true,
+                                onTap: () async {
+                                  final result = await showDatePicker(
+                                      context: context,
+                                      initialDate:
+                                          DateTime(DateTime.now().year - 20),
+                                      firstDate:
+                                          DateTime(DateTime.now().year - 50),
+                                      lastDate:
+                                          DateTime(DateTime.now().year - 15));
+
+                                  if (result != null) {
+                                    setState(() {
+                                      _dateTime =
+                                          result.toString().split(' ')[0];
+                                      print(_dateTime);
+                                    });
+                                  }
+                                },
+                                decoration: InputDecoration(
+                                  suffix: Text('Date Of Birth'),
+                                  hintText: _dateTime,
                                   hintStyle: TextStyle(
                                       color: Colors.grey, letterSpacing: 1.0),
-                                  border: InputBorder.none),
+                                  border: InputBorder.none,
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom:
+                                          BorderSide(color: Colors.grey[300]))),
+                              child: TextFormField(
+                                onChanged: (value) => phone = value,
+                                keyboardType: TextInputType.number,
+                                validator: (value) {
+                                  return (value.length != 10)
+                                      ? 'Invalid Phone number'
+                                      : null;
+                                },
+                                decoration: InputDecoration(
+                                  hintText: "Phone",
+                                  hintStyle: TextStyle(
+                                      color: Colors.grey, letterSpacing: 1.0),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom:
+                                          BorderSide(color: Colors.grey[300]))),
+                              child: TextFormField(
+                                onChanged: (value) => email = value,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (value) {
+                                  return (value.isEmpty ||
+                                          !value.contains('@') ||
+                                          !value.contains('.'))
+                                      ? 'Invalid Email'
+                                      : null;
+                                },
+                                decoration: InputDecoration(
+                                  hintText: "Email",
+                                  hintStyle: TextStyle(
+                                      color: Colors.grey, letterSpacing: 1.0),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom:
+                                          BorderSide(color: Colors.grey[300]))),
+                              child: TextFormField(
+                                onChanged: (value) => bio = value,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (value) {
+                                  return (value.length < 5)
+                                      ? 'Invalid Bio'
+                                      : null;
+                                },
+                                decoration: InputDecoration(
+                                  hintText: "Bio",
+                                  hintStyle: TextStyle(
+                                      color: Colors.grey, letterSpacing: 1.0),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ),
+                            DropdownButtonFormField<String>(
+                                decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.only(
+                                        top: 16, bottom: 16, left: 9)),
+                                isExpanded: true,
+                                iconEnabledColor: Colors.grey,
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 18),
+                                iconSize: 30,
+                                elevation: 9,
+                                value: selectedArea,
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedArea = newValue;
+                                  });
+                                },
+                                items: <String>[
+                                  'Vishakapatnam',
+                                  'krishna',
+                                  'East Godavari',
+                                  'Guntur',
+                                  'SPSR Nellore',
+                                  'kurnool',
+                                  'YSR Kadapa',
+                                  'Chittor',
+                                  'West Godavari',
+                                  'Prakasam',
+                                  'Ananthapur',
+                                  'Vizainagaram',
+                                  'Guntur',
+                                  'Kadapa',
+                                  'Kurnool',
+                                  'krishna',
+                                  'Ananthapur',
+                                  'West Godavari',
+                                  'Srikakulam',
+                                ].map<DropdownMenuItem<String>>((e) {
+                                  return DropdownMenuItem<String>(
+                                      value: e,
+                                      child: Text(
+                                        e.toString(),
+                                      ));
+                                }).toList()),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom:
+                                          BorderSide(color: Colors.grey[300]),
+                                      top:
+                                          BorderSide(color: Colors.grey[300]))),
+                              child: TextFormField(
+                                onChanged: (value) => password = value,
+                                validator: (value) {
+                                  return (value.isEmpty || value.length < 6)
+                                      ? 'Invalid Password'
+                                      : null;
+                                },
+                                style: TextStyle(letterSpacing: 1.5),
+                                obscureText: hidePassword,
+                                decoration: InputDecoration(
+                                    hintText: "Password",
+                                    suffixIcon: IconButton(
+                                      icon: Icon(Icons.remove_red_eye,
+                                          color:
+                                              _colorsMap.getBackgroundColor()),
+                                      onPressed: () {
+                                        setState(() {
+                                          hidePassword = !hidePassword;
+                                        });
+                                      },
+                                    ),
+                                    hintStyle: TextStyle(
+                                        color: Colors.grey, letterSpacing: 1.0),
+                                    border: InputBorder.none),
+                              ),
+                            ),
+                            Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                  border: Border(
+                                      bottom:
+                                          BorderSide(color: Colors.grey[200]))),
+                              child: TextFormField(
+                                onChanged: (value) => passwordClone = value,
+                                validator: (value) {
+                                  return ((value.isEmpty ||
+                                          value.length < 6 ||
+                                          value != password))
+                                      ? 'Invalid Password'
+                                      : null;
+                                },
+                                style: TextStyle(letterSpacing: 1.5),
+                                obscureText: hidePassword,
+                                decoration: InputDecoration(
+                                    hintText: "Re-Enter Password",
+                                    suffixIcon: IconButton(
+                                      icon: Icon(Icons.remove_red_eye,
+                                          color:
+                                              _colorsMap.getBackgroundColor()),
+                                      onPressed: () {
+                                        setState(() {
+                                          hidePassword = !hidePassword;
+                                        });
+                                      },
+                                    ),
+                                    hintStyle: TextStyle(
+                                        color: Colors.grey, letterSpacing: 1.0),
+                                    border: InputBorder.none),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  ListTile(
-                      onTap: () async {
-                        if (_formKey.currentState.validate()) {
-                          signUp();
-                        }
-                      },
-                      title: Center(
-                          child: Container(
-                        padding: EdgeInsets.all(18),
-                        decoration: BoxDecoration(
+                    ListTile(
+                        onTap: () async {
+                          if (_formKey.currentState.validate()) {
+                            signUp();
+                          }
+                        },
+                        title: Center(
+                            child: Container(
+                          padding: EdgeInsets.all(18),
+                          decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(27),
-                            color: Colors.blue),
-                        child: Text(
-                          'Register',
-                          style: TextStyle(color: Colors.white, fontSize: 18),
-                        ),
-                      ))),
-                  ListTile(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      title: Center(
-                        child: Text(
-                          'Already have an Account ?',
-                          style: TextStyle(color: Colors.grey.shade900),
-                        ),
-                      ))
-                ],
-              ),
+                            color: _colorsMap.getBackgroundColor(),
+                          ),
+                          child: Text(
+                            'Register',
+                            style: TextStyle(color: Colors.white, fontSize: 18),
+                          ),
+                        ))),
+                    ListTile(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        title: Center(
+                          child: Text(
+                            'Already have an Account ?',
+                            style: TextStyle(color: Colors.grey.shade900),
+                          ),
+                        ))
+                  ],
+                ),
+        ),
       ),
     );
   }
